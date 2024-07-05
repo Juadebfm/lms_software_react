@@ -4,8 +4,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        gilroy: ["Gilroy_Regular", "sans-serif"],
+        gilroy: ["Gilroy", "sans-serif"],
         gilroy_thin: ["Gilroy_Thin", "sans-serif"],
+        gilroy_light: ["Gilroy_Light", "sans-serif"],
         gilroy_semibold: ["Gilroy_Semibold", "sans-serif"],
         gilroy_bold: ["Gilroy_Bold", "sans-serif"],
       },

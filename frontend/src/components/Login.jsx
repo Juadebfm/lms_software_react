@@ -1,97 +1,100 @@
-import React, { useState } from "react";
-import LoginImg from "../assets/signinPage.png";
-import Validation from "../utils/LoginValidation";
+import React from "react";
+import LoginImg from "../assets/loginImg.png";
+import { Link } from "react-router-dom";
+import "../index.css";
 
 const Login = () => {
-  const [values, setValues] = useState({
-    email: "",
-    password: "",
-  });
-  const [errors, setErrors] = useState({});
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    setErrors(Validation(values));
-  };
-
-  const handleChange = () => {
-    setValues((prev) => ({
-      ...prev,
-      [event.target.name]: [event.target.value],
-    }));
-  };
   return (
-    <div className="grid grid-cols-2 items-center justify-center gap-14 font-gilroy h-screen bg-pc_bg text-base">
-      <div className="bg-pc_white_white w-full h-full flex items-start justify-center flex-col p-20">
-        <div className="space-y-3 mb-14">
-          <h1 className="text-heading_1 text-pc_blue font-gilroy_bold font-bold">
-            Welcome Back!
-          </h1>
-          <p className="font-gilroy_thin font-light text-pc_dark_gray">
-            Login to your PluralCode account
-          </p>
-        </div>
-        <form action="" onSubmit={handleSubmit} className="w-full">
-          <div className="flex flex-col items-start justify-center space-y-2 mb-10">
+    <div className="h-full lg:h-screen grid grid-cols-1 lg:grid-cols-2 bg-[#F5F6FA] gap-3 lg:gap-16 overflow-auto lg:overflow-hidden">
+      <div className="flex flex-col items-start justify-center px-[35px] md:px-24 bg-white rounded-tr-3xl rounded-bl-rounded-tr-3xl py-24">
+        <h1 className="text-pc_blue font-gilroy_bold font-medium text-[40px] lg:text-[46px] leading-tight">
+          Welcome Back!
+        </h1>
+        <p className="font-gilroy_light font-extralight text-pc_black/70 pl-2">
+          Login to your PluralCode account
+        </p>
+
+        <div className="mt-10 w-full space-y-10">
+          <div className="flex flex-col items-start justify-start">
             <label
-              className="font-gilroy_thin text-pc_dark_gray font-light"
-              htmlFor="Email"
+              htmlFor="email"
+              className="font-gilroy_light font-extralight"
             >
               Email
             </label>
             <input
-              className="py-4 px-6 border border-pc_dark_gray/30 rounded-md bg-transparent w-full placeholder:font-light placeholder:font-gilroy focus:!outline-none text-base"
               type="email"
-              onChange={handleChange}
               placeholder="Enter Email"
-              name="email"
+              className="rounded-lg mt-3 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
             />
-            <span>
-              {errors.email && (
-                <span className="text-red-500">{errors.email}</span>
-              )}
-            </span>
           </div>
-          <div>
-            <div className="flex flex-col items-start justify-center space-y-2">
-              <label
-                className="font-gilroy_thin text-pc_dark_gray font-light"
-                htmlFor="Password"
-              >
-                Password
-              </label>
-              <input
-                onChange={handleChange}
-                className="py-4 px-6 border border-pc_dark_gray/30 rounded-md bg-transparent w-full placeholder:font-light placeholder:font-gilroy focus:!outline-none text-base"
-                type="password"
-                placeholder="Enter Password"
-                name="password"
-              />
-            </div>
-            <div className="flex items-center justify-between mt-3">
-              <div>
-                <input type="checkbox" className="cursor-pointer" />
-                <label
-                  htmlFor="Remember me"
-                  className="ml-2 font-gilroy_thin font-light text-pc_dark_gray"
-                >
-                  Remember Me
-                </label>
-              </div>
-              <span className="font-gilroy_bold text-pc_blue font-bold">
-                Forgot Password
-              </span>
-            </div>
+          <div className="flex flex-col items-start justify-start">
+            <label
+              htmlFor="password"
+              className="font-gilroy_light font-extralight"
+            >
+              Password
+            </label>
+            <input
+              type="password"
+              placeholder="Enter Password"
+              className="rounded-lg mt-3 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
+            />
           </div>
-          <button
-            type="submit"
-            className="py-4 px-6 bg-pc_orange hover:shadow-md shadow-pc_dark_gray hover:bg-pc_orange/90 mt-10 w-full rounded-md text-white duration-200 ease-linear transition-all"
+        </div>
+        <div className="mt-4 flex items-center justify-between w-full">
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="remember_me"
+              className="custom-checkbox"
+            />
+            <label
+              htmlFor="remember_me"
+              className="ml-2 font-gilroy_light font-extralight"
+            >
+              Remember Me
+            </label>
+          </div>
+          <Link
+            to="/"
+            className="font-gilroy_semibold font-medium text-pc_blue"
           >
+            Forgot Password
+          </Link>
+        </div>
+        <div className="flex items-center justify-center flex-col w-full mx-auto mt-10">
+          <button className="mb-4 rounded-lg mt-3 px-6 py-4 w-full bg-pc_orange text-white font-gilroy_semibold font-semibold hover:shadow-md hover:outline hover:outline-slate-200 transition-shadow duration-150 ease-linear">
             Login
           </button>
-        </form>
+          <p className="text-base text-center font-gilroy">
+            Don't have an account?{" "}
+            <span className="text-pc_orange">Create an Account</span>
+          </p>
+        </div>
       </div>
-      <div className="bg-pc_white_white w-full h-full flex items-center justify-center">
-        <img src={LoginImg} alt="Student" />
+      <div className="relative bg-white flex items-center justify-center p-[35px] lg:p-20 overflow-hidden">
+        <img
+          src={LoginImg}
+          alt="Login"
+          className="relative z-10 p-0 md:p-20 -mt-14"
+        />
+        {[...Array(7)].map(
+          (_, index) =>
+            index !== 0 && (
+              <div
+                key={index}
+                className={`absolute border border-[#939393]/25 rounded-full`}
+                style={{
+                  width: `${400 + index * 80}px`, // Increased width increment
+                  height: `${400 + index * 80}px`, // Increased height increment
+                  top: `calc(50% - ${200 + index * 40}px)`, // Adjusted top position
+                  left: `calc(50% - ${200 + index * 40}px)`, // Adjusted left position
+                  zIndex: 1,
+                }}
+              ></div>
+            )
+        )}
       </div>
     </div>
   );

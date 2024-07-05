@@ -4,17 +4,43 @@
 
 @font-face {
   font-family: "Gilroy";
-  src: url(././assets/fonts/Gilroy-Regular.ttf);
+  src: url(./assets/fonts/Gilroy-Regular.ttf);
 }
 @font-face {
   font-family: "Gilroy_Thin";
-  src: url(../assets/fonts/Gilroy-Thin.ttf);
+  src: url(./assets/fonts/Gilroy-Thin.ttf);
+}
+@font-face {
+  font-family: "Gilroy_Light";
+  src: url(./assets/fonts/Gilroy-Light.ttf);
 }
 @font-face {
   font-family: "Gilroy_Semibold";
-  src: url(../assets/fonts/Gilroy-SemiBold.ttf);
+  src: url(./assets/fonts/Gilroy-SemiBold.ttf);
 }
 @font-face {
   font-family: "Gilroy_Bold";
-  src: url(../assets/fonts/Gilroy-Bold.ttf);
+  src: url(./assets/fonts/Gilroy-Bold.ttf);
+}
+
+/* Add this CSS to your styles.css or equivalent file */
+.custom-checkbox {
+  width: 18px;
+  height: 18px;
+  appearance: none;
+  border: 1px solid #939393;
+  border-radius: 3px;
+  position: relative;
+  cursor: pointer;
+}
+
+.custom-checkbox:checked::before {
+  content: "";
+  position: absolute;
+  top: 0.2px;
+  left: 0.1px;
+  width: 16px;
+  height: 16px;
+  background-color: #f8991d; /* pc_orange color */
+  border-radius: 2px;
 }
