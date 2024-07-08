@@ -1,9 +1,62 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import LoginImg from "../assets/loginImg.png";
 import { Link } from "react-router-dom";
+import { TbRotateClockwise2 } from "react-icons/tb";
+
 import "../index.css";
 
 const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogin = async () => {
+    setLoading(true); // Start loading
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    const raw = JSON.stringify({ email, password });
+
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
+
+    try {
+      const response = await fetch(
+        "https://backend.pluralcode.institute/student/login",
+        requestOptions
+      );
+      const result = await response.json();
+
+      if (response.ok) {
+        console.log(result);
+        localStorage.setItem("isAuthenticated", true);
+        navigate("/dashboard");
+      } else {
+        setError(
+          result.message || "Login failed. Please check your credentials."
+        );
+        setLoading(false); // Stop loading on error
+      }
+    } catch (error) {
+      console.log("error", error);
+      setError("An error occurred. Please try again later.");
+      setLoading(false); // Stop loading on error
+    }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prevState) => !prevState);
+  };
+
   return (
     <div className="h-full lg:h-screen grid grid-cols-1 lg:grid-cols-2 bg-[#F5F6FA] gap-3 lg:gap-16 overflow-auto lg:overflow-hidden">
       <div className="flex flex-col items-start justify-center px-[35px] md:px-24 bg-white rounded-tr-3xl rounded-bl-rounded-tr-3xl py-24">
@@ -26,9 +79,11 @@ const Login = () => {
               type="email"
               placeholder="Enter Email"
               className="rounded-lg mt-3 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          <div className="flex flex-col items-start justify-start">
+          <div className="flex flex-col items-start justify-start relative">
             <label
               htmlFor="password"
               className="font-gilroy_light font-extralight"
@@ -36,14 +91,24 @@ const Login = () => {
               Password
             </label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Enter Password"
-              className="rounded-lg mt-3 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
+              className="relative rounded-lg mt-3 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
+            <div
+              className="absolute top-[50%] right-5 translate-y-[50%] cursor-pointer text-[#939393]"
+              onClick={togglePasswordVisibility}
+            >
+              <div className="flex items-center justify-center text-pc_black text-lg">
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </div>
+            </div>
           </div>
         </div>
         <div className="mt-4 flex items-center justify-between w-full">
-          <div className="flex items-center">
+          <div className="flex items-center invisible">
             <input
               type="checkbox"
               id="remember_me"
@@ -57,20 +122,34 @@ const Login = () => {
             </label>
           </div>
           <Link
-            to="/"
+            to="/forgotpassword"
             className="font-gilroy_semibold font-medium text-pc_blue"
           >
             Forgot Password
           </Link>
         </div>
         <div className="flex items-center justify-center flex-col w-full mx-auto mt-10">
-          <button className="mb-4 rounded-lg mt-3 px-6 py-4 w-full bg-pc_orange text-white font-gilroy_semibold font-semibold hover:shadow-md hover:outline hover:outline-slate-200 transition-shadow duration-150 ease-linear">
-            Login
+          <button
+            onClick={handleLogin}
+            className="mb-4 rounded-lg mt-3 px-6 py-4 w-full bg-pc_orange text-white font-gilroy_semibold font-semibold hover:shadow-md hover:outline hover:outline-slate-200 transition-shadow duration-150 ease-linear flex items-center justify-center gap-2"
+            disabled={loading} // Disable the button when loading
+          >
+            {loading ? (
+              <>
+                <span>Logging In...</span>
+                <TbRotateClockwise2 className="text-xl animate-spin" />
+              </>
+            ) : (
+              "Login"
+            )}
           </button>
-          <p className="text-base text-center font-gilroy">
+          {error && <p className="text-red-500 font-bold font-gilroy_bold mt-2">{error}</p>}
+          {/* <p className="text-base text-center font-gilroy">
             Don't have an account?{" "}
-            <span className="text-pc_orange">Create an Account</span>
-          </p>
+            <Link to="/signup" className="text-pc_orange">
+              Create an Account
+            </Link>
+          </p> */}
         </div>
       </div>
       <div className="relative bg-white flex items-center justify-center p-[35px] lg:p-20 overflow-hidden">
@@ -86,10 +165,10 @@ const Login = () => {
                 key={index}
                 className={`absolute border border-[#939393]/25 rounded-full`}
                 style={{
-                  width: `${400 + index * 80}px`, // Increased width increment
-                  height: `${400 + index * 80}px`, // Increased height increment
-                  top: `calc(50% - ${200 + index * 40}px)`, // Adjusted top position
-                  left: `calc(50% - ${200 + index * 40}px)`, // Adjusted left position
+                  width: `${400 + index * 80}px`,
+                  height: `${400 + index * 80}px`,
+                  top: `calc(50% - ${200 + index * 40}px)`,
+                  left: `calc(50% - ${200 + index * 40}px)`,
                   zIndex: 1,
                 }}
               ></div>

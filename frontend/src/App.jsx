@@ -1,16 +1,29 @@
-import ForgotPassword from "./components/ForgotPassword";
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Login from "./components/Login";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import VerificationCode from "./components/VerificationCode";
+import Dashboard from "./components/Dashboard";
+import ProtectedRoutes from "./utils/ProtectedRoutes";
+import ForgotPassword from "./components/ForgotPassword";
+import Profile from "./components/Profile";
 
-export default function App() {
+const App = () => {
   return (
-    <div className="overflow-x-hidden font-gilroy">
-      <Router>
-        <Routes>
-          <Route path="/" element={<VerificationCode />} />
-        </Routes>
-      </Router>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/forgotpassword" element={<ForgotPassword />} />
+        <Route
+          path="/dashboard"
+          element={<ProtectedRoutes element={<Dashboard />} />}
+        />
+        <Route
+          path="/profile"
+          element={<ProtectedRoutes element={<Profile />} />}
+        />
+        <Route path="/" element={<Login />} />
+      </Routes>
+    </Router>
   );
-}
+};
+
+export default App;
