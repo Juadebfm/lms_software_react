@@ -283,35 +283,35 @@ const Dashboard = () => {
         {/* Main Content */}
         <div className="flex-1 p-8 bg-pc_bg overflow-y-auto" id="main-content">
           {/* Information Tiles */}
-          <div className="grid grid-cols-2 place-items-center gap-8 bg-transparent">
-            <div className="w-full bg-white rounded-xl py-10 px-14 flex items-center justify-start gap-5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 place-items-center gap-8 bg-transparent">
+            <div className="w-full bg-white rounded-xl py-10 px-[20px] lg:px-14 flex items-center justify-start gap-5">
               <div className="w-[60px] h-[60px] flex items-center justify-center bg-pc_blue/10 rounded-full">
                 <BsWalletFill size={25} className="text-pc_blue" />
               </div>
               <div>
-                <h1 className="text-[24px] font-gilroy_semibold leading-none">
+                <h1 className="text-[21px] lg:text-[24px] font-gilroy_semibold leading-none">
                   My Balance
                 </h1>
-                <div className="flex items-center mt-2 justify-center">
+                <div className="flex items-center mt-1 lg:mt-2 justify-center">
                   <span className="font-gilroy">Outstanding Balance:</span>
                   <span className="flex items-center justify-center text-pc_orange">
                     <TbCurrencyNaira size={20} className="leading-none" />
-                    <span className="font-gilroy_semibold text-[20px] leading-none pt-1">
+                    <span className="font-gilroy_semibold text-[17px] lg:text-[20px] leading-none pt-1">
                       {userDetails.balance}
                     </span>
                   </span>
                 </div>
               </div>
             </div>
-            <div className="w-full bg-white rounded-xl py-10 px-14 flex items-center justify-start gap-5">
+            <div className="w-full bg-white rounded-xl py-10 px-[20px] lg:px-14 flex items-center justify-start gap-5">
               <div className="w-[60px] h-[60px] flex items-center justify-center bg-pc_orange/10 rounded-full">
                 <PiBookOpenTextFill size={28} className="text-pc_orange" />
               </div>
               <div>
-                <h1 className="text-[24px] font-gilroy_semibold leading-none">
+                <h1 className="text-[21px] lg:text-[24px] font-gilroy_semibold leading-none">
                   My Courses
                 </h1>
-                <div className="flex items-center mt-2 justify-center font-gilroy">
+                <div className="flex items-center mt-1 lg:mt-2 justify-center font-gilroy">
                   <span className="font-semibold mr-1">{numberOfCourses}</span>
                   Registered course{numberOfCourses !== 1 && "s"}
                 </div>
@@ -319,23 +319,23 @@ const Dashboard = () => {
             </div>
           </div>
           {/* Course and cetificate toggle buttons */}
-          <div className="px-14 pt-10 w-full bg-white rounded-xl mt-8 flex justify-start items-center gap-8 font-gilroy">
+          <div className="px-[20px] lg:px-14 pt-10 w-full bg-white rounded-xl mt-8 flex justify-center lg:justify-start items-center gap-8 font-gilroy">
             <button>My Courses</button>
             <button>Certificates</button>
           </div>
           {/* Certificate and courses sessions and toggle */}
-          <div className="bg-white px-14 py-16 mt-8 rounded-lg">
+          <div className="bg-white px-[20px] lg:px-14 py-16 mt-8 rounded-lg">
             <div>
               <div>Div for course cards</div>
               <div>Div for certificates </div>
             </div>
             <div
               id="faq"
-              className="FAQ shadow-lg bg-white mt-16 py-7 px-14 rounded-lg w-[90%] mx-auto cursor-pointer relative"
+              className="FAQ shadow-lg bg-white mt-16 py-7 px-[20px] lg:px-14 rounded-lg w-full lg:w-[90%] mx-auto cursor-pointer relative"
               onClick={toggleFAQVisibility}
             >
               <div className="flex items-center justify-between w-full cursor-pointer">
-                <div className="w-[24px] h-[24px] bg-pc_blue rounded-full"></div>
+                <div className="w-[24px] h-[24px] bg-pc_blue rounded-full hidden lg:block"></div>
                 <h3 className="font-gilroy_thin text-black">
                   Difference between instructor-led vs self-paced courses
                 </h3>
