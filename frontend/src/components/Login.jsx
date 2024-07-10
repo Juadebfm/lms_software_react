@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import LoginImg from "../assets/loginImg.png";
 import { Link } from "react-router-dom";
 import { TbRotateClockwise2 } from "react-icons/tb";
-
+import { AuthContext } from "../context/AuthContext";
 import "../index.css";
 
 const Login = () => {
@@ -13,6 +13,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { setUserData } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleLogin = async () => {
@@ -39,6 +40,7 @@ const Login = () => {
       if (response.ok) {
         console.log(result);
         localStorage.setItem("isAuthenticated", true);
+        setUserData(result); // Store user data in context
         navigate("/dashboard");
       } else {
         setError(
@@ -102,7 +104,7 @@ const Login = () => {
               onClick={togglePasswordVisibility}
             >
               <div className="flex items-center justify-center text-pc_black text-lg">
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                {showPassword ? <FaEye /> : <FaEyeSlash />}
               </div>
             </div>
           </div>
@@ -143,7 +145,11 @@ const Login = () => {
               "Login"
             )}
           </button>
-          {error && <p className="text-red-500 font-bold font-gilroy_bold mt-2">{error}</p>}
+          {error && (
+            <p className="text-red-500 font-bold font-gilroy_bold mt-2">
+              {error}
+            </p>
+          )}
           {/* <p className="text-base text-center font-gilroy">
             Don't have an account?{" "}
             <Link to="/signup" className="text-pc_orange">
