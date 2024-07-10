@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { IoMdSearch } from "react-icons/io";
 import { IoChevronDownSharp } from "react-icons/io5";
@@ -8,12 +8,15 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { TbLogout } from "react-icons/tb";
 import { CiUser } from "react-icons/ci";
 import { MdDashboard } from "react-icons/md";
+import { AuthContext } from "../context/AuthContext";
 
 const Profile = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+
+  const { userData } = useContext(AuthContext); // Access user data
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -33,6 +36,8 @@ const Profile = () => {
     localStorage.removeItem("isAuthenticated");
     navigate("/login");
   };
+
+  const { enrolledcourses, message, token, totalbalance, user } = userData;
 
   return (
     <div className="flex h-screen">
@@ -187,18 +192,6 @@ const Profile = () => {
         </div>
         <ul className="mt-4 w-full font-gilroy">
           <Link
-            to="/profile"
-            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses(
-              "/profile"
-            )}`}
-            onClick={toggleMobileSidebar}
-          >
-            <div className="flex items-center gap-2 text-[18px]">
-              <CiUser />
-              <span>Profile</span>
-            </div>
-          </Link>
-          <Link
             to="/dashboard"
             className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses(
               "/dashboard"
@@ -210,8 +203,23 @@ const Profile = () => {
               <span>Dashboard</span>
             </div>
           </Link>
+          <Link
+            to="/profile"
+            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses(
+              "/profile"
+            )}`}
+            onClick={toggleMobileSidebar}
+          >
+            <div className="flex items-center gap-2 text-[18px]">
+              <CiUser />
+              <span>Profile</span>
+            </div>
+          </Link>
           <button
-            onClick={handleLogout}
+            onClick={() => {
+              handleLogout();
+              toggleMobileSidebar();
+            }}
             className="flex items-center justify-start py-5 pl-8 text-[18px] w-full text-left"
           >
             <div className="flex items-center gap-2">
@@ -220,6 +228,16 @@ const Profile = () => {
             </div>
           </button>
         </ul>
+        <div className="flex items-center justify-center gap-3 mt-20">
+          <div className="flex flex-col items-start justify-start leading-tight">
+            <span className="font-gilroy_semibold font-medium">
+              {user.name}
+            </span>
+            <span className="font-gilroy_light mt-1">
+              {user.student_id_number}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );

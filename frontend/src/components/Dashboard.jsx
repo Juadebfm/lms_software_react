@@ -21,6 +21,7 @@ const Dashboard = () => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isDetailsVisible, setIsDetailsVisible] = useState(false); // State to track visibility of the div
   const [isNavScrolled, setIsNavScrolled] = useState(false); // State to track if the main content is scrolled
+  const [activeTab, setActiveTab] = useState("courses");
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -320,18 +321,46 @@ const Dashboard = () => {
           </div>
           {/* Course and cetificate toggle buttons */}
           <div className="px-[20px] lg:px-14 pt-10 w-full bg-white rounded-xl mt-8 flex justify-center lg:justify-start items-center gap-8 font-gilroy">
-            <button>My Courses</button>
-            <button>Certificates</button>
+            <button
+              onClick={() => setActiveTab("courses")}
+              className={`${
+                activeTab === "courses"
+                  ? "text-pc_orange border-b-2 border-pc_orange"
+                  : "text-black"
+              } pb-1`}
+            >
+              My Courses
+            </button>
+            <button
+              onClick={() => setActiveTab("certificates")}
+              className={`${
+                activeTab === "certificates"
+                  ? "text-pc_orange border-b-2 border-pc_orange"
+                  : "text-black"
+              } pb-1`}
+            >
+              Certificates
+            </button>
           </div>
+
           {/* Certificate and courses sessions and toggle */}
           <div className="bg-white px-[20px] lg:px-14 py-16 mt-8 rounded-lg">
-            <div>
-              <div>Div for course cards</div>
-              <div>Div for certificates </div>
+            <div className="bg-white px-[20px] lg:px-14 py-16 mt-8 rounded-lg">
+              {activeTab === "courses" && (
+                <div>
+                  <div>Div for course cards</div>
+                </div>
+              )}
+              {activeTab === "certificates" && (
+                <div>
+                  <div>Div for certificates</div>
+                </div>
+              )}
             </div>
+
             <div
               id="faq"
-              className="FAQ shadow-lg bg-white mt-16 py-7 px-[20px] lg:px-14 rounded-lg w-full lg:w-[90%] mx-auto cursor-pointer relative"
+              className="FAQ shadow-lg bg-white mt-16 py-7 px-[20px] lg:px-14 rounded-lg w-full lg:w-[70%] mx-auto cursor-pointer relative"
               onClick={toggleFAQVisibility}
             >
               <div className="flex items-center justify-between w-full cursor-pointer">
@@ -378,18 +407,6 @@ const Dashboard = () => {
         </div>
         <ul className="mt-4 w-full font-gilroy">
           <Link
-            to="/profile"
-            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses(
-              "/profile"
-            )}`}
-            onClick={toggleMobileSidebar}
-          >
-            <div className="flex items-center gap-2 text-[18px]">
-              <CiUser />
-              <span>Profile</span>
-            </div>
-          </Link>
-          <Link
             to="/dashboard"
             className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses(
               "/dashboard"
@@ -399,6 +416,18 @@ const Dashboard = () => {
             <div className="flex items-center gap-2 text-[18px]">
               <MdDashboard />
               <span>Dashboard</span>
+            </div>
+          </Link>
+          <Link
+            to="/profile"
+            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses(
+              "/profile"
+            )}`}
+            onClick={toggleMobileSidebar}
+          >
+            <div className="flex items-center gap-2 text-[18px]">
+              <CiUser />
+              <span>Profile</span>
             </div>
           </Link>
           <button
@@ -414,6 +443,16 @@ const Dashboard = () => {
             </div>
           </button>
         </ul>
+        <div className="flex items-center justify-center gap-3 mt-20">
+          <div className="flex flex-col items-start justify-start leading-tight">
+            <span className="font-gilroy_semibold font-medium">
+              {user.name}
+            </span>
+            <span className="font-gilroy_light mt-1">
+              {user.student_id_number}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
