@@ -1,5 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { FaBars, FaTimes } from "react-icons/fa";
+import { CgMenuRight } from "react-icons/cg";
+
 import { IoMdSearch } from "react-icons/io";
 import { IoChevronDownSharp } from "react-icons/io5";
 import { IoChevronUpSharp } from "react-icons/io5";
@@ -13,8 +15,10 @@ import { AuthContext } from "../context/AuthContext";
 import { BsWalletFill } from "react-icons/bs";
 import { TbCurrencyNaira } from "react-icons/tb";
 import { PiBookOpenTextFill } from "react-icons/pi";
-import { HiChevronRight } from "react-icons/hi2";
+import { HiChevronRight, HiUser } from "react-icons/hi2";
 import { HiChevronDown } from "react-icons/hi2";
+import { IoIosArrowRoundForward } from "react-icons/io";
+import { TfiHelpAlt } from "react-icons/tfi";
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -44,6 +48,12 @@ const Dashboard = () => {
   const getLinkClasses = (path) => {
     return location.pathname === path
       ? "bg-pc_bg text-pc_orange border-l-4 border-pc_orange"
+      : "text-pc_black";
+  };
+
+  const getLinkClasses2 = (path) => {
+    return location.pathname === path
+      ? "bg-white text-pc_orange border-l-4 border-pc_orange"
       : "text-pc_black";
   };
 
@@ -122,6 +132,62 @@ const Dashboard = () => {
     };
   }, []);
 
+  const courseDescription = [
+    {
+      courseName: "Product Design",
+      description:
+        "Learn UI/UX from scratch without writing a single code. Master how to design high fidelity interfaces with FIGMA, design journey mapping, and empathize with users.",
+    },
+    {
+      courseName: "Product Management",
+      description:
+        "Become a professional product manager in 8 weeks. Learn how to gather user data, identify their needs, and understand how it benefits them.",
+    },
+    {
+      courseName: "Data Analytics",
+      description:
+        "Master data analytics and become proficient in analyzing data to make informed decisions. Learn how to use tools like Excel, SQL, and Tableau for data visualization and insights.",
+    },
+    {
+      courseName: "Cyber Security",
+      description:
+        "Learn the fundamentals of cybersecurity, including threat analysis, risk management, and how to protect systems and networks from cyber attacks. Gain practical skills in ethical hacking and penetration testing.",
+    },
+    {
+      courseName: "Project Management",
+      description:
+        "Become an expert in project management. Learn the essential skills to plan, execute, and deliver projects successfully using methodologies like Agile, Scrum, and Waterfall.",
+    },
+    {
+      courseName: "Cloud Computing",
+      description:
+        "Understand the principles of cloud computing and how to deploy and manage applications in the cloud. Gain hands-on experience with platforms like AWS, Azure, and Google Cloud.",
+    },
+    {
+      courseName: "Business Analytics",
+      description:
+        "Learn to analyze business data and gain insights to drive strategic decision-making. Become proficient in using analytical tools and techniques to improve business performance.",
+    },
+    {
+      courseName: "Content Creation & Digital Growth",
+      description:
+        "Develop your skills in content creation and learn strategies to grow digital presence. Master various content formats, SEO, social media marketing, and analytics to engage and expand your audience.",
+    },
+    {
+      courseName: "Full-Stack Software Development",
+      description:
+        "Become proficient in both front-end and back-end development. Learn popular technologies and frameworks such as React.js, Node.js, ExpressJS, MongoDB.",
+    },
+  ];
+
+  const handleClickCourse = (course) => {
+    // Store course information in local storage
+    localStorage.setItem("selectedCourse", JSON.stringify(course));
+
+    // Navigate to the course module page (replace with your actual route)
+    navigate(`/courses/${course.id}`);
+  };
+
   return (
     <div className="flex h-screen overflow-x-hidden">
       {/* Sidebar */}
@@ -152,9 +218,9 @@ const Dashboard = () => {
         <ul className="mt-10 w-full font-gilroy">
           <Link
             to="/dashboard"
-            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses(
-              "/dashboard"
-            )}`}
+            className={`flex items-center ${
+              isSidebarOpen ? "justify-start pl-8" : "justify-center"
+            } py-5 ${getLinkClasses("/dashboard")}`}
           >
             {isSidebarOpen ? (
               <div className="flex items-center gap-2 text-[18px]">
@@ -169,25 +235,44 @@ const Dashboard = () => {
           </Link>
           <Link
             to="/profile"
-            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses(
-              "/profile"
-            )}`}
+            className={`flex items-center ${
+              isSidebarOpen ? "justify-start pl-8" : "justify-center"
+            } py-5 ${getLinkClasses("/profile")}`}
           >
             {isSidebarOpen ? (
               <div className="flex items-center gap-2 text-[18px]">
-                <CiUser />
+                <HiUser />
                 <span>Profile</span>
               </div>
             ) : (
               <div className="text-2xl">
-                <CiUser />
+                <HiUser />
               </div>
             )}
           </Link>
+          <Link
+            to="/help_center"
+            className={`flex items-center ${
+              isSidebarOpen ? "justify-start pl-8" : "justify-center"
+            } py-5 ${getLinkClasses("/help_center")}`}
+          >
+            {isSidebarOpen ? (
+              <div className="flex items-center gap-2 text-[18px]">
+                <TfiHelpAlt />
 
+                <span>Help Center</span>
+              </div>
+            ) : (
+              <div className="text-2xl">
+                <TfiHelpAlt />
+              </div>
+            )}
+          </Link>
           <button
             onClick={handleLogout}
-            className="flex items-center justify-start py-5 pl-8 text-[18px] w-full text-left text-pc_black"
+            className={`flex items-center ${
+              isSidebarOpen ? "justify-start pl-8" : "justify-center"
+            } py-5 text-[18px] w-full text-left text-pc_black`}
           >
             {isSidebarOpen ? (
               <div className="flex items-center gap-2">
@@ -204,38 +289,38 @@ const Dashboard = () => {
       </div>
 
       {/* Main section */}
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 bg-pc_bg">
         {/* Navbar */}
         <div
-          className={`bg-white py-5 px-[30px] lg:px-12 shadow flex justify-between items-center ${
+          className={`bg-white py-5 px-[30px] lg:px-12 shadow flex justify-between items-center mb-5 ${
             isNavScrolled ? "border-b border-pc_light_gray/30" : ""
           }`}
         >
           <div className="relative hidden lg:block">
             <IoMdSearch
               size={20}
-              className="absolute top-[50%] left-3 -translate-y-[50%] text-[#898989]"
+              className="absolute top-[50%] left-3 -translate-y-[50%] text-[#898989] "
             />
 
             <input
               type="text"
               placeholder="Search..."
-              className="bg-pc_bg w-[400px] shadow-sm rounded-md py-3 placeholder:text-sm placeholder:text-[#898989] pl-10"
+              className="bg-pc_bg w-[400px] shadow-sm rounded-md py-3 placeholder:text-sm placeholder:text-[#898989] placeholder:font-gilroy pl-10"
             />
           </div>
           {/* Mobile Navbar */}
-          <div className="md:hidden flex items-center justify-between w-full">
+          <div className="md:hidden flex items-center justify-between w-full py-4">
             <div
-              className="flex items-center justify-center bg-pc_blue text-white rounded-full cursor-pointer"
+              className="flex items-center justify-center text-white rounded-full cursor-pointer"
               onClick={toggleMobileSidebar}
             >
-              <img src={Plc} alt="Company Logo" className="w-10 h-10" />
+              <img src={Pluralcode} alt="Company Logo" className="w-[170px]" />
             </div>
             <button
               onClick={toggleMobileSidebar}
-              className="text-2xl cursor-pointer"
+              className="text-[28px] cursor-pointer bg-pc_blue text-pc_white_white p-1 rounded-full"
             >
-              {isMobileSidebarOpen ? <FaTimes /> : <FaBars />}
+              {isMobileSidebarOpen ? <FaTimes /> : <CgMenuRight />}
             </button>
           </div>
           <div className="hidden lg:flex items-center justify-center gap-2">
@@ -280,9 +365,16 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-
+        <div className="w-full bg-pc_white_white py-6 flex items-center justify-center">
+          <h1 className="font-gilroy text-[20px] w-full text-center">
+            My Courses
+          </h1>
+        </div>
         {/* Main Content */}
-        <div className="flex-1 p-8 bg-pc_bg overflow-y-auto" id="main-content">
+        <div
+          className="flex-1 p-6 md:p-8 bg-pc_bg overflow-y-auto"
+          id="main-content"
+        >
           {/* Information Tiles */}
           <div className="grid grid-cols-1 lg:grid-cols-2 place-items-center gap-8 bg-transparent">
             <div className="w-full bg-white rounded-xl py-10 px-[20px] lg:px-14 flex items-center justify-start gap-5">
@@ -294,50 +386,51 @@ const Dashboard = () => {
                   My Balance
                 </h1>
                 <div className="flex items-center mt-1 lg:mt-2 justify-center">
-                  <span className="font-gilroy">Outstanding Balance:</span>
+                  <span className="font-gilroy text-sm md:text-base">
+                    Outstanding Balance:
+                  </span>
                   <span className="flex items-center justify-center text-pc_orange">
-                    <TbCurrencyNaira size={20} className="leading-none" />
-                    <span className="font-gilroy_semibold text-[17px] lg:text-[20px] leading-none pt-1">
+                    <TbCurrencyNaira className="leading-none font-gilroy text-sm md:text-base" />
+                    <span className="font-gilroy_semibold text-md md:text-base leading-none pt-1">
                       {userDetails.balance}
                     </span>
                   </span>
                 </div>
               </div>
             </div>
-            <div className="w-full bg-white rounded-xl py-10 px-[20px] lg:px-14 flex items-center justify-start gap-5">
+            <div className="w-full hidden bg-white rounded-xl py-10 px-[20px] lg:px-14 md:flex items-center justify-start gap-5">
               <div className="w-[60px] h-[60px] flex items-center justify-center bg-pc_orange/10 rounded-full">
                 <PiBookOpenTextFill size={28} className="text-pc_orange" />
               </div>
               <div>
-                <h1 className="text-[21px] lg:text-[24px] font-gilroy_semibold leading-none">
-                  My Courses
-                </h1>
+                <h1 className="font-gilroy text-sm md:text-base">My Courses</h1>
                 <div className="flex items-center mt-1 lg:mt-2 justify-center font-gilroy">
                   <span className="font-semibold mr-1">{numberOfCourses}</span>
                   Registered course{numberOfCourses !== 1 && "s"}
                 </div>
               </div>
             </div>
+            <div></div>
           </div>
           {/* Course and cetificate toggle buttons */}
-          <div className="px-[20px] lg:px-14 pt-10 w-full bg-white rounded-xl mt-8 flex justify-center lg:justify-start items-center gap-8 font-gilroy">
+          <div className="bg-white px-[20px] lg:px-14 md:pt-10 py-4 md:py-0 w-full rounded-xl mt-8 flex justify-center lg:justify-start lg:items-center gap-6 font-gilroy">
             <button
               onClick={() => setActiveTab("courses")}
               className={`${
                 activeTab === "courses"
-                  ? "text-pc_orange border-b-2 border-pc_orange"
-                  : "text-black"
-              } pb-1`}
+                  ? " text-pc_white_white md:text-pc_orange border-none md:border-b-2 border-transparent md:border-pc_orange bg-pc_blue md:bg-transparent px-8 md:px-0 py-3 md:py-0 rounded-md font-gilroy_semibold"
+                  : "text-pc_black bg-pc_bg px-8 md:px-0 py-3 md:py-0 rounded-md font-gilroy"
+              }`}
             >
-              My Courses
+              <span>My Courses</span>
             </button>
             <button
               onClick={() => setActiveTab("certificates")}
               className={`${
                 activeTab === "certificates"
-                  ? "text-pc_orange border-b-2 border-pc_orange"
-                  : "text-black"
-              } pb-1`}
+                  ? " text-pc_white_white md:text-pc_orange border-none md:border-b-2 border-transparent md:border-pc_orange bg-pc_blue md:bg-transparent px-8 md:px-0 py-3 md:py-0 rounded-md font-gilroy_semibold"
+                  : "text-pc_black bg-pc_bg px-8 md:px-0 py-3 md:py-0 rounded-md"
+              }`}
             >
               Certificates
             </button>
@@ -345,10 +438,64 @@ const Dashboard = () => {
 
           {/* Certificate and courses sessions and toggle */}
           <div className="bg-white px-[20px] lg:px-14 py-16 mt-8 rounded-lg">
-            <div className="bg-white px-[20px] lg:px-14 py-16 mt-8 rounded-lg">
+            <div className="">
               {activeTab === "courses" && (
-                <div>
-                  <div>Div for course cards</div>
+                <div className="flex items-center justify-center flex-wrap gap-14">
+                  {enrolledcourses
+                    .filter(
+                      (course) =>
+                        typeof course === "object" && !Array.isArray(course)
+                    )
+                    .map((course, index) => (
+                      <div
+                        key={index}
+                        className="p-4 md:p-6 bg-pc_bg rounded-tl-3xl rounded-br-3xl w-full md:w-[350px] h-[470px] relative"
+                      >
+                        <img
+                          src={course.course_image_url}
+                          alt={course.course_name}
+                          className="w-full"
+                        />
+                        <h2 className="mt-8 font-gilroy_bold text-[18px] leading-tight font-bold text-pc_blue">
+                          {course.course_name}
+                        </h2>
+                        {courseDescription.map((desc) => {
+                          if (desc.courseName === course.course_name) {
+                            return (
+                              <p
+                                key={desc.courseName}
+                                className="mt-2 font-gilroy_thin text-pc_black text-[14px] line-clamp-4"
+                              >
+                                {desc.description}
+                              </p>
+                            );
+                          }
+                          return null;
+                        })}
+
+                        <button
+                          className="mt-5 flex items-center justify-center gap-1 leading-none cursor-pointer text-pc_orange"
+                          onClick={() => handleClickCourse(course)}
+                        >
+                          <span>Start Learning</span>
+                          <span>
+                            <IoIosArrowRoundForward />
+                          </span>
+                        </button>
+
+                        <div
+                          className={`bg-pc_orange text-white w-max text-[10px] font-gilroy_bold rounded-t-md py-1 absolute bottom-0 right-8 px-2 ${
+                            course.enrollment_source === "admission_form"
+                              ? "instructor-led"
+                              : "self-paced"
+                          }`}
+                        >
+                          {course.enrollment_source === "admission_form"
+                            ? "Instructor-led"
+                            : "Self-Paced"}
+                        </div>
+                      </div>
+                    ))}
                 </div>
               )}
               {activeTab === "certificates" && (
@@ -360,12 +507,12 @@ const Dashboard = () => {
 
             <div
               id="faq"
-              className="FAQ shadow-lg bg-white mt-16 py-7 px-[20px] lg:px-14 rounded-lg w-full lg:w-[70%] mx-auto cursor-pointer relative"
+              className="FAQ shadow-lg bg-white mt-16 py-7 px-[20px] lg:px-14 rounded-lg w-full lg:w-[80%] mx-auto cursor-pointer relative"
               onClick={toggleFAQVisibility}
             >
               <div className="flex items-center justify-between w-full cursor-pointer">
                 <div className="w-[24px] h-[24px] bg-pc_blue rounded-full hidden lg:block"></div>
-                <h3 className="font-gilroy_thin text-black">
+                <h3 className="font-gilroy_thin text-sm md:text-base text-black">
                   Difference between instructor-led vs self-paced courses
                 </h3>
                 {isFAQVisible ? (
@@ -395,20 +542,31 @@ const Dashboard = () => {
       <div
         className={`${
           isMobileSidebarOpen ? "block" : "hidden"
-        } bg-white text-pc_black w-64 fixed top-0 left-0 h-full md:hidden transition-all duration-300`}
+        } bg-white text-pc_black w-[80%] fixed top-0 left-0 h-full md:hidden transition-all duration-300 py-[31px]`}
       >
-        <div className="flex justify-between items-center w-full p-2">
-          <img
-            src={Pluralcode}
-            alt="Expanded"
-            onClick={toggleMobileSidebar}
-            className="cursor-pointer p-5"
-          />
+        <div className="flex justify-between items-center px-6">
+          <div className="flex items-center justify-center gap-3">
+            <div className="bg-blue-100 p-2 rounded-full">
+              <div className="bg-pc_blue text-white p-4 rounded-full flex items-center justify-center h-11 w-11">
+                <span className="leading-none font-gilroy_semibold">
+                  {getInitials(user.name)}
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-col items-start justify-start leading-tight">
+              <span className="font-gilroy_semibold font-medium">
+                {user.name}
+              </span>
+              <span className="font-gilroy_light mt-1">
+                {user.student_id_number}
+              </span>
+            </div>
+          </div>
         </div>
-        <ul className="mt-4 w-full font-gilroy">
+        <ul className="mt-4 w-full font-gilroy bg-pc_bg pt-16">
           <Link
             to="/dashboard"
-            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses(
+            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses2(
               "/dashboard"
             )}`}
             onClick={toggleMobileSidebar}
@@ -420,16 +578,36 @@ const Dashboard = () => {
           </Link>
           <Link
             to="/profile"
-            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses(
+            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses2(
               "/profile"
             )}`}
             onClick={toggleMobileSidebar}
           >
             <div className="flex items-center gap-2 text-[18px]">
-              <CiUser />
+              <HiUser />
               <span>Profile</span>
             </div>
           </Link>
+          <Link
+            onClick={toggleMobileSidebar}
+            to="/help_center"
+            className={`flex items-center ${
+              isSidebarOpen ? "justify-start pl-8" : "justify-center"
+            } py-5 ${getLinkClasses2("/help_center")}`}
+          >
+            {isSidebarOpen ? (
+              <div className="flex items-center gap-2 text-[18px]">
+                <TfiHelpAlt />
+
+                <span>Help Center</span>
+              </div>
+            ) : (
+              <div className="text-2xl">
+                <TfiHelpAlt />
+              </div>
+            )}
+          </Link>
+
           <button
             onClick={() => {
               handleLogout();
@@ -443,16 +621,6 @@ const Dashboard = () => {
             </div>
           </button>
         </ul>
-        <div className="flex items-center justify-center gap-3 mt-20">
-          <div className="flex flex-col items-start justify-start leading-tight">
-            <span className="font-gilroy_semibold font-medium">
-              {user.name}
-            </span>
-            <span className="font-gilroy_light mt-1">
-              {user.student_id_number}
-            </span>
-          </div>
-        </div>
       </div>
     </div>
   );

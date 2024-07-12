@@ -9,6 +9,7 @@ export default {
         gilroy_light: ["Gilroy_Light", "sans-serif"],
         gilroy_semibold: ["Gilroy_Semibold", "sans-serif"],
         gilroy_bold: ["Gilroy_Bold", "sans-serif"],
+        inter: ["Inter", "sans-serif"],
       },
       fontSize: {
         heading_1: "28px",

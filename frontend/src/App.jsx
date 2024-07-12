@@ -5,6 +5,8 @@ import Dashboard from "./components/Dashboard";
 import ProtectedRoutes from "./utils/ProtectedRoutes";
 import ForgotPassword from "./components/ForgotPassword";
 import Profile from "./components/Profile";
+import CourseModulesPage from "./components/CourseModule";
+import HelpCenter from "./components/HelpCenter";
 
 const App = () => {
   return (
@@ -20,6 +22,15 @@ const App = () => {
           path="/profile"
           element={<ProtectedRoutes element={<Profile />} />}
         />
+        <Route
+          path="/courses/:courseId"
+          element={<ProtectedRoutes element={<CourseModulesPage />} />}
+        />
+        <Route
+          path="/help_center"
+          element={<ProtectedRoutes element={<HelpCenter />} />}
+        />
+
         <Route path="/" element={<Login />} />
       </Routes>
     </Router>

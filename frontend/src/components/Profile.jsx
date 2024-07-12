@@ -1,18 +1,23 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { IoMdSearch } from "react-icons/io";
-import { IoChevronDownSharp } from "react-icons/io5";
+import { IoChevronDownSharp, IoChevronUpSharp } from "react-icons/io5";
 import Pluralcode from "../assets/PluralCode.png";
 import Plc from "../assets/plc.png";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { TbLogout } from "react-icons/tb";
-import { CiUser } from "react-icons/ci";
+import { HiPlus, HiUser } from "react-icons/hi2";
 import { MdDashboard } from "react-icons/md";
 import { AuthContext } from "../context/AuthContext";
+import { TfiHelpAlt } from "react-icons/tfi";
 
 const Profile = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isDetailsVisible, setIsDetailsVisible] = useState(false); // State to track visibility of the div
+
+  const [isNavScrolled, setIsNavScrolled] = useState(false); // State to track if the main content is scrolled
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -26,6 +31,10 @@ const Profile = () => {
     setIsMobileSidebarOpen(!isMobileSidebarOpen);
   };
 
+  const toggleDetailsVisibility = () => {
+    setIsDetailsVisible((prev) => !prev);
+  };
+
   const getLinkClasses = (path) => {
     return location.pathname === path
       ? "bg-pc_bg text-pc_orange border-l-4 border-pc_orange"
@@ -36,8 +45,54 @@ const Profile = () => {
     localStorage.removeItem("isAuthenticated");
     navigate("/login");
   };
+  // Function to get initials from the user's name
+  const getInitials = (name) => {
+    const nameArray = name.split(" ");
+    const initials = nameArray.map((n) => n[0]).join("");
+    return initials;
+  };
 
   const { enrolledcourses, message, token, totalbalance, user } = userData;
+
+  const {
+    academy_level,
+    age,
+    country,
+    year,
+    student_id_number,
+    state,
+    email,
+    phone_number,
+    date,
+    name,
+    password,
+    refname1,
+    refname2,
+    refphone1,
+    refphone2,
+  } = user;
+
+  // Capitalize the first letter of the email
+  const capitalizedEmail = email.charAt(0).toUpperCase() + email.slice(1);
+
+  // Handle scroll event to detect if the main content is scrolled
+  useEffect(() => {
+    const handleScroll = () => {
+      const mainContent = document.getElementById("main-content");
+      if (mainContent.scrollTop > 0) {
+        setIsNavScrolled(true);
+      } else {
+        setIsNavScrolled(false);
+      }
+    };
+
+    const mainContent = document.getElementById("main-content");
+    mainContent.addEventListener("scroll", handleScroll);
+
+    return () => {
+      mainContent.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   return (
     <div className="flex h-screen">
@@ -69,9 +124,9 @@ const Profile = () => {
         <ul className="mt-10 w-full font-gilroy">
           <Link
             to="/dashboard"
-            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses(
-              "/dashboard"
-            )}`}
+            className={`flex items-center ${
+              isSidebarOpen ? "justify-start pl-8" : "justify-center"
+            } py-5 ${getLinkClasses("/dashboard")}`}
           >
             {isSidebarOpen ? (
               <div className="flex items-center gap-2 text-[18px]">
@@ -86,25 +141,44 @@ const Profile = () => {
           </Link>
           <Link
             to="/profile"
-            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses(
-              "/profile"
-            )}`}
+            className={`flex items-center ${
+              isSidebarOpen ? "justify-start pl-8" : "justify-center"
+            } py-5 ${getLinkClasses("/profile")}`}
           >
             {isSidebarOpen ? (
               <div className="flex items-center gap-2 text-[18px]">
-                <CiUser />
+                <HiUser />
                 <span>Profile</span>
               </div>
             ) : (
               <div className="text-2xl">
-                <CiUser />
+                <HiUser />
               </div>
             )}
           </Link>
+          <Link
+            to="/help_center"
+            className={`flex items-center ${
+              isSidebarOpen ? "justify-start pl-8" : "justify-center"
+            } py-5 ${getLinkClasses("/help_center")}`}
+          >
+            {isSidebarOpen ? (
+              <div className="flex items-center gap-2 text-[18px]">
+                <TfiHelpAlt />
 
+                <span>Help Center</span>
+              </div>
+            ) : (
+              <div className="text-2xl">
+                <TfiHelpAlt />
+              </div>
+            )}
+          </Link>
           <button
             onClick={handleLogout}
-            className="flex items-center justify-start py-5 pl-8 text-[18px] w-full text-left text-pc_black"
+            className={`flex items-center ${
+              isSidebarOpen ? "justify-start pl-8" : "justify-center"
+            } py-5 text-[18px] w-full text-left text-pc_black`}
           >
             {isSidebarOpen ? (
               <div className="flex items-center gap-2">
@@ -123,17 +197,21 @@ const Profile = () => {
       {/* Main section */}
       <div className="flex flex-col flex-1">
         {/* Navbar */}
-        <div className="bg-white py-5 px-[30px] lg:px-12 shadow flex justify-between items-center">
+        <div
+          className={`bg-white py-5 px-[30px] lg:px-12 shadow flex justify-between items-center ${
+            isNavScrolled ? "border-b border-pc_light_gray/30" : ""
+          }`}
+        >
           <div className="relative hidden lg:block">
             <IoMdSearch
               size={20}
-              className="absolute top-[50%] left-3 -translate-y-[50%] text-[#898989]"
+              className="absolute top-[50%] left-3 -translate-y-[50%] text-[#898989] "
             />
 
             <input
               type="text"
               placeholder="Search..."
-              className="bg-pc_bg w-[400px] shadow-sm rounded-md py-3 placeholder:text-sm placeholder:text-[#898989] pl-10"
+              className="bg-pc_bg w-[400px] shadow-sm rounded-md py-3 placeholder:text-sm placeholder:text-[#898989] placeholder:font-gilroy pl-10"
             />
           </div>
           {/* Mobile Navbar */}
@@ -154,25 +232,289 @@ const Profile = () => {
           <div className="hidden lg:flex items-center justify-center gap-2">
             <div className="bg-blue-100 p-2 rounded-full">
               <div className="bg-pc_blue text-white p-4 rounded-full flex items-center justify-center h-11 w-11">
-                <span className="leading-none font-gilroy_semibold">MP</span>
+                <span className="leading-none font-gilroy_semibold">
+                  {getInitials(user.name)}
+                </span>
               </div>
             </div>
             <div className="flex items-center justify-center gap-3">
               <div className="flex flex-col items-start justify-start leading-tight">
                 <span className="font-gilroy_semibold font-medium">
-                  Mabel Praise
+                  {user.name}
                 </span>
-                <span className="font-gilroy_light">Student ID: COH3456</span>
+                <span className="font-gilroy_light mt-1">
+                  {user.student_id_number}
+                </span>
               </div>
-              <IoChevronDownSharp size={25} className="font-extrabold" />
+              <div className="relative">
+                {isDetailsVisible ? (
+                  <IoChevronUpSharp
+                    size={25}
+                    className="font-extrabold cursor-pointer"
+                    onClick={toggleDetailsVisibility}
+                  />
+                ) : (
+                  <IoChevronDownSharp
+                    size={25}
+                    className="font-extrabold cursor-pointer"
+                    onClick={toggleDetailsVisibility}
+                  />
+                )}
+                {isDetailsVisible && (
+                  <div className="absolute top-10 font-gilroy_light p-6 right-0 flex flex-col mt-2 bg-white shadow-lg rounded-lg">
+                    <span>{capitalizedEmail}</span>
+                    <span>{state}</span>
+                    <span>{country}</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-4 bg-pc_bg">
-          <h2 className="text-xl font-semibold">Main Content</h2>
-          <p className="mt-4">This is the main content area.</p>
+        <div
+          className="flex-1 p-8 bg-pc_bg overflow-y-auto font-gilroy"
+          id="main-content"
+        >
+          <div className="bg-pc_white_white min-h-screen rounded-xl p-14 w-[90%]">
+            <h2 className="text-[32px] font-gilroy_semibold leading-tight font-bold text-pc_blue">
+              My Profile
+            </h2>
+            <p className="mt-2">Kindly click on any of the fields to edit</p>
+            {/* Personal Information */}
+            <div className="mt-20">
+              <h2 className="text-[24px] font-gilroy_semibold leading-tight font-bold text-pc_blue">
+                Personal Information
+              </h2>
+              <div className="mt-7 w-full space-y-5">
+                {/* Name */}
+                <div className="flex flex-col items-start justify-start">
+                  <label
+                    htmlFor="name"
+                    className="font-gilroy_light font-extralight"
+                  >
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    className="rounded-lg mt-2 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
+                    defaultValue={name}
+                    readOnly
+                  />
+                </div>
+                {/* Student id */}
+
+                <div className="flex flex-col items-start justify-start">
+                  <label
+                    htmlFor="student_id"
+                    className="font-gilroy_light font-extralight"
+                  >
+                    Student ID
+                  </label>
+                  <input
+                    type="text"
+                    className="rounded-lg mt-2 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
+                    defaultValue={student_id_number}
+                    readOnly
+                  />
+                </div>
+                <div className="flex flex-col items-start justify-start">
+                  <label
+                    htmlFor="phone_number"
+                    className="font-gilroy_light font-extralight"
+                  >
+                    Phone Number
+                  </label>
+                  <input
+                    type="text"
+                    className="rounded-lg mt-2 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
+                    defaultValue={phone_number}
+                    readOnly
+                  />
+                </div>
+                <div className="flex flex-col items-start justify-start">
+                  <label
+                    htmlFor="name"
+                    className="font-gilroy_light font-extralight"
+                  >
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    className="rounded-lg mt-2 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
+                    defaultValue={email}
+                    readOnly
+                  />
+                </div>
+                <div className="flex flex-col items-start justify-start">
+                  <label
+                    htmlFor="password"
+                    className="font-gilroy_light font-extralight"
+                  >
+                    Password
+                  </label>
+                  <div className="w-full relative">
+                    <input
+                      type="password"
+                      className="rounded-lg mt-2 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
+                      defaultValue={password}
+                      readOnly
+                    />
+                    <button className="absolute right-8 top-[54%] cursor-pointer text-pc_orange leading-none translate-y-[-50%]">
+                      <span className="pt-2"> Edit Password</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Reference */}
+            <div className="mt-14">
+              <h2 className="text-[24px] font-gilroy_semibold leading-tight font-bold text-pc_blue">
+                Reference Information
+              </h2>
+              <div className="mt-7 w-full grid grid-cols-2 gap-8">
+                {/* Name */}
+                <div className="flex flex-col items-start justify-start">
+                  <label
+                    htmlFor="name"
+                    className="font-gilroy_light font-extralight"
+                  >
+                    Emergency Name
+                  </label>
+                  <input
+                    type="text"
+                    className="rounded-lg mt-2 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
+                    defaultValue={refname1}
+                    readOnly
+                  />
+                </div>
+                <div className="flex flex-col items-start justify-start">
+                  <label
+                    htmlFor="phone_number"
+                    className="font-gilroy_light font-extralight"
+                  >
+                    Emergency Phone Number
+                  </label>
+                  <input
+                    type="text"
+                    className="rounded-lg mt-2 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
+                    defaultValue={refphone1}
+                    readOnly
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Reference 2 */}
+            <div className="mt-14">
+              <h2 className="text-[24px] font-gilroy_semibold leading-tight font-bold text-pc_blue">
+                Reference Information II
+              </h2>
+              <div className="mt-7 w-full grid grid-cols-2 gap-8">
+                {/* Name */}
+                <div className="flex flex-col items-start justify-start">
+                  <label
+                    htmlFor="name"
+                    className="font-gilroy_light font-extralight"
+                  >
+                    Reference Name
+                  </label>
+                  <input
+                    type="text"
+                    className="rounded-lg mt-2 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
+                    defaultValue={refname2}
+                    readOnly
+                  />
+                </div>
+                <div className="flex flex-col items-start justify-start">
+                  <label
+                    htmlFor="phone_number"
+                    className="font-gilroy_light font-extralight"
+                  >
+                    Reference Phone Number
+                  </label>
+                  <input
+                    type="text"
+                    className="rounded-lg mt-2 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
+                    defaultValue={refphone2}
+                    readOnly
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Id information*/}
+            <div className="mt-14">
+              <h2 className="text-[24px] font-gilroy_semibold leading-tight font-bold text-pc_blue">
+                ID Information
+              </h2>
+              <div className="mt-7 w-full grid grid-cols-2 gap-8">
+                <div className="flex flex-col items-start justify-start">
+                  <label
+                    htmlFor="id_type"
+                    className="font-gilroy_light font-extralight"
+                  >
+                    Select ID Type
+                  </label>
+                  <div className="relative w-full">
+                    <select
+                      name="id_type"
+                      className="appearance-none rounded-lg mt-2 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393] bg-transparent"
+                    >
+                      <option value="Select ID Type">Select ID Type</option>
+                      <option value="International Passport">
+                        International Passport
+                      </option>
+                      <option value="Driver's license">Driver's license</option>
+                      <option value="Voters Card">Voters Card</option>
+                      <option value="NIMC ID card">NIMC ID card</option>
+                      <option value="NIN Slip">NIN Slip</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                      <svg
+                        className="h-5 w-5 text-gray-400"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 12a1 1 0 01-.707-.293l-4-4a1 1 0 111.414-1.414L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4A1 1 0 0110 12z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-start justify-start">
+                  <label
+                    htmlFor="file-upload"
+                    className="font-gilroy_light font-extralight"
+                  >
+                    Upload File
+                  </label>
+                  <div className="relative w-full">
+                    <input type="file" id="file-upload" className="hidden" />
+                    <label
+                      htmlFor="file-upload"
+                      className="cursor-pointer block bg-white rounded-lg mt-2 px-6 py-4 w-full border border-[#939393] relative"
+                      style={{ minHeight: "56px" }} // Ensures consistent height
+                    >
+                      <HiPlus className="h-6 w-6 absolute top-1/2 transform -translate-y-1/2 right-4 text-pc_orange cursor-pointer" />
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button className="mb-4 mt-20 rounded-lg px-6 py-4 w-[355px] bg-pc_orange text-white font-gilroy_semibold font-semibold hover:shadow-md hover:outline hover:outline-slate-200 transition-shadow duration-150 ease-linear flex items-center justify-center gap-2">
+              Save Changes
+            </button>
+          </div>
         </div>
       </div>
 
@@ -182,7 +524,7 @@ const Profile = () => {
           isMobileSidebarOpen ? "block" : "hidden"
         } bg-white text-pc_black w-64 fixed top-0 left-0 h-full md:hidden transition-all duration-300`}
       >
-        <div className="flex justify-between items-center w-full p-2">
+        <div className="flex justify-between items-center w-full px-2">
           <img
             src={Pluralcode}
             alt="Expanded"
@@ -211,10 +553,30 @@ const Profile = () => {
             onClick={toggleMobileSidebar}
           >
             <div className="flex items-center gap-2 text-[18px]">
-              <CiUser />
+              <HiUser />
               <span>Profile</span>
             </div>
           </Link>
+          <Link
+            onClick={toggleMobileSidebar}
+            to="/help_center"
+            className={`flex items-center ${
+              isSidebarOpen ? "justify-start pl-8" : "justify-center"
+            } py-5 ${getLinkClasses("/help_center")}`}
+          >
+            {isSidebarOpen ? (
+              <div className="flex items-center gap-2 text-[18px]">
+                <TfiHelpAlt />
+
+                <span>Help Center</span>
+              </div>
+            ) : (
+              <div className="text-2xl">
+                <TfiHelpAlt />
+              </div>
+            )}
+          </Link>
+
           <button
             onClick={() => {
               handleLogout();

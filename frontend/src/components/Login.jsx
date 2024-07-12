@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { TbRotateClockwise2 } from "react-icons/tb";
 import { AuthContext } from "../context/AuthContext";
 import "../index.css";
+import Pluralcode from "../assets/PluralCode.png";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -60,9 +61,12 @@ const Login = () => {
   };
 
   return (
-    <div className="h-full lg:h-screen grid grid-cols-1 lg:grid-cols-2 bg-[#F5F6FA] gap-3 lg:gap-16 overflow-auto lg:overflow-hidden">
-      <div className="flex flex-col items-start justify-center px-[35px] md:px-24 bg-white rounded-tr-3xl rounded-bl-rounded-tr-3xl py-24">
-        <h1 className="text-pc_blue font-gilroy_bold font-medium text-[40px] lg:text-[46px] leading-tight">
+    <div className="h-screen grid grid-cols-1 lg:grid-cols-2 bg-pc_bg md:bg-[#F5F6FA] gap-3 lg:gap-16 overflow-auto lg:overflow-hidden px-6 md:px-0 py-6 lg:py-0">
+      <div className="flex lg:hidden items-center justify-center">
+        <img src={Pluralcode} alt="" className="w-[200px] mt-10 mb-5" />
+      </div>
+      <div className="flex flex-col items-center lg:items-start justify-center px-[25px] md:px-24 bg-white rounded-tl-3xl lg:rounded-tl-none rounded-tr-3xl rounded-bl-rounded-tr-3xl py-24">
+        <h1 className="text-pc_blue font-gilroy_semibold lg:font-gilroy_bold font-medium text-[36px] lg:text-[46px] leading-tight">
           Welcome Back!
         </h1>
         <p className="font-gilroy_light font-extralight text-pc_black/70 pl-2">
@@ -80,7 +84,7 @@ const Login = () => {
             <input
               type="email"
               placeholder="Enter Email"
-              className="rounded-lg mt-3 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
+              className="rounded-lg mt-3 px-6 py-4 w-full placeholder:text-[#939393] font-gilroy placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -95,7 +99,7 @@ const Login = () => {
             <input
               type={showPassword ? "text" : "password"}
               placeholder="Enter Password"
-              className="relative rounded-lg mt-3 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
+              className="relative rounded-lg mt-3 px-6 py-4 w-full placeholder:text-[#939393] font-gilroy placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -150,15 +154,15 @@ const Login = () => {
               {error}
             </p>
           )}
-          {/* <p className="text-base text-center font-gilroy">
+          <p className="text-base text-center font-gilroy">
             Don't have an account?{" "}
-            <Link to="/signup" className="text-pc_orange">
+            <Link to="/" className="text-pc_orange">
               Create an Account
             </Link>
-          </p> */}
+          </p>
         </div>
       </div>
-      <div className="relative bg-white flex items-center justify-center p-[35px] lg:p-20 overflow-hidden">
+      <div className="hidden md:flex relative bg-white items-center justify-center p-[35px] lg:p-20 overflow-hidden">
         <img
           src={LoginImg}
           alt="Login"
