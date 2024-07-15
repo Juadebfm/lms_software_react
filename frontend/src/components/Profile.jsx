@@ -5,7 +5,7 @@ import { IoChevronDownSharp, IoChevronUpSharp } from "react-icons/io5";
 import Pluralcode from "../assets/PluralCode.png";
 import Plc from "../assets/plc.png";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { TbLogout } from "react-icons/tb";
+import { TbLogout, TbRotateClockwise2 } from "react-icons/tb";
 import { HiPlus, HiUser } from "react-icons/hi2";
 import { MdDashboard } from "react-icons/md";
 import { AuthContext } from "../context/AuthContext";
@@ -17,6 +17,12 @@ const Profile = () => {
   const [isDetailsVisible, setIsDetailsVisible] = useState(false); // State to track visibility of the div
 
   const [isNavScrolled, setIsNavScrolled] = useState(false); // State to track if the main content is scrolled
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState("");
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -38,6 +44,12 @@ const Profile = () => {
   const getLinkClasses = (path) => {
     return location.pathname === path
       ? "bg-pc_bg text-pc_orange border-l-4 border-pc_orange"
+      : "text-pc_black";
+  };
+
+  const getLinkClasses2 = (path) => {
+    return location.pathname === path
+      ? "bg-white text-pc_orange border-l-4 border-pc_orange"
       : "text-pc_black";
   };
 
@@ -72,6 +84,20 @@ const Profile = () => {
     refphone2,
   } = user;
 
+  const [currentPassword, setCurrentPassword] = useState("");
+
+  const togglePasswordModal = () => {
+    setIsPasswordModalOpen(!isPasswordModalOpen);
+    // Reset states when modal closes
+    if (!isPasswordModalOpen) {
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+      setIsSuccess(false);
+      setError("");
+    }
+  };
+
   // Capitalize the first letter of the email
   const capitalizedEmail = email.charAt(0).toUpperCase() + email.slice(1);
 
@@ -93,6 +119,68 @@ const Profile = () => {
       mainContent.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  const savePasswordChanges = () => {
+    // Reset error messages
+    setError("");
+
+    // Input validation
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      setError("New password and confirm password must match.");
+      return;
+    }
+
+    // Prepare API request
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    myHeaders.append("Authorization", `Bearer ${token}`);
+
+    const raw = JSON.stringify({
+      oldpassword: currentPassword,
+      newpassword: newPassword,
+      confirmpassword: confirmNewPassword,
+    });
+
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
+
+    // Set loading state
+    setIsLoading(true);
+
+    // Call API
+    fetch(
+      "https://backend.pluralcode.institute/student/update-password",
+      requestOptions
+    )
+      .then((response) => {
+        setIsLoading(false);
+        if (!response.ok) {
+          throw new Error("Failed to update password.");
+        }
+        return response.text();
+      })
+      .then((result) => {
+        setIsSuccess(true);
+        setTimeout(() => {
+          setIsPasswordModalOpen(false); // Close modal after 3 seconds
+          setIsSuccess(false);
+        }, 3000);
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        setError("Failed to update password.");
+      });
+  };
 
   return (
     <div className="flex h-screen">
@@ -274,10 +362,10 @@ const Profile = () => {
 
         {/* Main Content */}
         <div
-          className="flex-1 p-8 bg-pc_bg overflow-y-auto font-gilroy"
+          className="flex-1 p-[20px] md:p-8 bg-pc_bg overflow-y-auto font-gilroy h-auto"
           id="main-content"
         >
-          <div className="bg-pc_white_white min-h-screen rounded-xl p-14 w-[90%]">
+          <div className="bg-pc_white_white min-h-screen rounded-xl p-[20px] lg:p-14 w-full lg:w-[90%]">
             <h2 className="text-[32px] font-gilroy_semibold leading-tight font-bold text-pc_blue">
               My Profile
             </h2>
@@ -361,8 +449,14 @@ const Profile = () => {
                       defaultValue={password}
                       readOnly
                     />
-                    <button className="absolute right-8 top-[54%] cursor-pointer text-pc_orange leading-none translate-y-[-50%]">
-                      <span className="pt-2"> Edit Password</span>
+                    <button
+                      onClick={togglePasswordModal}
+                      className="absolute right-8 top-[54%] cursor-pointer text-pc_orange leading-none translate-y-[-50%]"
+                    >
+                      <span className="pt-2 bg-pc_white_white px-4 lg:bg-transparent lg:px-0">
+                        {" "}
+                        Edit Password
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -374,7 +468,7 @@ const Profile = () => {
               <h2 className="text-[24px] font-gilroy_semibold leading-tight font-bold text-pc_blue">
                 Reference Information
               </h2>
-              <div className="mt-7 w-full grid grid-cols-2 gap-8">
+              <div className="mt-7 w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Name */}
                 <div className="flex flex-col items-start justify-start">
                   <label
@@ -412,7 +506,7 @@ const Profile = () => {
               <h2 className="text-[24px] font-gilroy_semibold leading-tight font-bold text-pc_blue">
                 Reference Information II
               </h2>
-              <div className="mt-7 w-full grid grid-cols-2 gap-8">
+              <div className="mt-7 w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Name */}
                 <div className="flex flex-col items-start justify-start">
                   <label
@@ -450,7 +544,7 @@ const Profile = () => {
               <h2 className="text-[24px] font-gilroy_semibold leading-tight font-bold text-pc_blue">
                 ID Information
               </h2>
-              <div className="mt-7 w-full grid grid-cols-2 gap-8">
+              <div className="mt-7 w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="flex flex-col items-start justify-start">
                   <label
                     htmlFor="id_type"
@@ -511,7 +605,7 @@ const Profile = () => {
               </div>
             </div>
 
-            <button className="mb-4 mt-20 rounded-lg px-6 py-4 w-[355px] bg-pc_orange text-white font-gilroy_semibold font-semibold hover:shadow-md hover:outline hover:outline-slate-200 transition-shadow duration-150 ease-linear flex items-center justify-center gap-2">
+            <button className="mb-4 mt-20 rounded-lg px-6 py-4 w-full lg:w-[355px] bg-pc_orange text-white font-gilroy_semibold font-semibold hover:shadow-md hover:outline hover:outline-slate-200 transition-shadow duration-150 ease-linear flex items-center justify-center gap-2">
               Save Changes
             </button>
           </div>
@@ -522,20 +616,31 @@ const Profile = () => {
       <div
         className={`${
           isMobileSidebarOpen ? "block" : "hidden"
-        } bg-white text-pc_black w-64 fixed top-0 left-0 h-full md:hidden transition-all duration-300`}
+        } bg-pc_bg text-pc_black w-[80%] fixed top-0 left-0 h-full md:hidden transition-all duration-300 py-[31px]`}
       >
-        <div className="flex justify-between items-center w-full px-2">
-          <img
-            src={Pluralcode}
-            alt="Expanded"
-            onClick={toggleMobileSidebar}
-            className="cursor-pointer p-5"
-          />
+        <div className="flex justify-between items-center px-6">
+          <div className="flex items-center justify-center gap-3 ">
+            <div className="bg-blue-100 p-2 rounded-full">
+              <div className="bg-pc_blue text-white p-4 rounded-full flex items-center justify-center h-11 w-11">
+                <span className="leading-none font-gilroy_semibold">
+                  {getInitials(user.name)}
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-col items-start justify-start leading-tight">
+              <span className="font-gilroy_semibold font-medium">
+                {user.name}
+              </span>
+              <span className="font-gilroy_light mt-1">
+                {user.student_id_number}
+              </span>
+            </div>
+          </div>
         </div>
-        <ul className="mt-4 w-full font-gilroy">
+        <ul className="mt-4 w-full font-gilroy bg-pc_bg pt-16">
           <Link
             to="/dashboard"
-            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses(
+            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses2(
               "/dashboard"
             )}`}
             onClick={toggleMobileSidebar}
@@ -547,7 +652,7 @@ const Profile = () => {
           </Link>
           <Link
             to="/profile"
-            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses(
+            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses2(
               "/profile"
             )}`}
             onClick={toggleMobileSidebar}
@@ -562,7 +667,7 @@ const Profile = () => {
             to="/help_center"
             className={`flex items-center ${
               isSidebarOpen ? "justify-start pl-8" : "justify-center"
-            } py-5 ${getLinkClasses("/help_center")}`}
+            } py-5 ${getLinkClasses2("/help_center")}`}
           >
             {isSidebarOpen ? (
               <div className="flex items-center gap-2 text-[18px]">
@@ -590,17 +695,83 @@ const Profile = () => {
             </div>
           </button>
         </ul>
-        <div className="flex items-center justify-center gap-3 mt-20">
-          <div className="flex flex-col items-start justify-start leading-tight">
-            <span className="font-gilroy_semibold font-medium">
-              {user.name}
-            </span>
-            <span className="font-gilroy_light mt-1">
-              {user.student_id_number}
-            </span>
+      </div>
+
+      {/* Modal JSX */}
+      {isPasswordModalOpen && (
+        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-900 bg-opacity-50 z-50 font-gilroy_light">
+          <div className="bg-white rounded-lg p-10 w-[450px] h-auto">
+            <div className="flex flex-col space-y-4">
+              {/* Error message */}
+              {error && (
+                <p className="text-red-500 font-gilroy_semibold">{error}</p>
+              )}
+              {/* Current Password */}
+              <div className="flex flex-col items-start justify-start w-full mb-7">
+                <label htmlFor="old_password" className="mb-2">
+                  Old Password
+                </label>
+                <input
+                  type="password"
+                  placeholder="Current Password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="rounded-lg px-4 py-3 border border-gray-300 w-full"
+                />
+              </div>
+              <div className="w-full">
+                <label htmlFor="new_password" className="">
+                  New Password
+                </label>
+                {/* New Password */}
+                <input
+                  type="password"
+                  placeholder="New Password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="rounded-lg px-4 py-3 border border-gray-300 w-full mt-3"
+                />
+                {/* Confirm New Password */}
+                <input
+                  type="password"
+                  placeholder="Confirm New Password"
+                  value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  className="rounded-lg px-4 py-3 border border-gray-300 w-full mt-5"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4 place-items-center place-content-center">
+                <button
+                  onClick={togglePasswordModal}
+                  className="px-6 py-3 mr-2 rounded-lg border border-pc_orange bg-transparent text-pc_orange hover:bg-pc_orange hover:text-pc_white_white transition-colors duration-200 w-full mt-5"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={savePasswordChanges}
+                  className="px-6 py-3 rounded-lg bg-pc_orange text-white hover:shadow-md hover:outline hover:outline-slate-200 transition-shadow duration-150 ease-linear w-full mt-5"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <div className="flex items-center justify-center">
+                      <span className="mr-2">Saving...</span>
+                      <TbRotateClockwise2 className="text-xl animate-spin" />
+                    </div>
+                  ) : (
+                    "Save"
+                  )}
+                </button>
+              </div>
+              {/* Success message */}
+              {isSuccess && (
+                <div className="text-green-500 font-gilroy_semibold mt-2">
+                  Password successfully updated.
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

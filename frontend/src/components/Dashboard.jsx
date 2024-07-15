@@ -296,7 +296,7 @@ const Dashboard = () => {
             isNavScrolled ? "border-b border-pc_light_gray/30" : ""
           }`}
         >
-          <div className="relative hidden lg:block">
+          <div className="relative hidden md:block">
             <IoMdSearch
               size={20}
               className="absolute top-[50%] left-3 -translate-y-[50%] text-[#898989] "
@@ -365,7 +365,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-        <div className="w-full bg-pc_white_white py-6 flex items-center justify-center">
+        <div className="w-full lg:hidden bg-pc_white_white py-6 flex items-center justify-center">
           <h1 className="font-gilroy text-[20px] w-full text-center">
             My Courses
           </h1>
@@ -542,10 +542,10 @@ const Dashboard = () => {
       <div
         className={`${
           isMobileSidebarOpen ? "block" : "hidden"
-        } bg-white text-pc_black w-[80%] fixed top-0 left-0 h-full md:hidden transition-all duration-300 py-[31px]`}
+        } bg-pc_bg text-pc_black w-[80%] fixed top-0 left-0 h-full md:hidden transition-all duration-300 py-[31px]`}
       >
         <div className="flex justify-between items-center px-6">
-          <div className="flex items-center justify-center gap-3">
+          <div className="flex items-center justify-center gap-3 ">
             <div className="bg-blue-100 p-2 rounded-full">
               <div className="bg-pc_blue text-white p-4 rounded-full flex items-center justify-center h-11 w-11">
                 <span className="leading-none font-gilroy_semibold">
@@ -627,7 +627,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-// {
-//   /*  */
-// }
