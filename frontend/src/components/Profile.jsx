@@ -10,6 +10,7 @@ import { HiPlus, HiUser } from "react-icons/hi2";
 import { MdDashboard } from "react-icons/md";
 import { AuthContext } from "../context/AuthContext";
 import { TfiHelpAlt } from "react-icons/tfi";
+import { CgMenuRight } from "react-icons/cg";
 
 const Profile = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -286,11 +287,11 @@ const Profile = () => {
       <div className="flex flex-col flex-1">
         {/* Navbar */}
         <div
-          className={`bg-white py-5 px-[30px] lg:px-12 shadow flex justify-between items-center ${
+          className={`bg-white py-5 px-[30px] lg:px-12 shadow flex justify-between items-center mb-5 ${
             isNavScrolled ? "border-b border-pc_light_gray/30" : ""
           }`}
         >
-          <div className="relative hidden lg:block">
+          <div className="relative hidden md:block">
             <IoMdSearch
               size={20}
               className="absolute top-[50%] left-3 -translate-y-[50%] text-[#898989] "
@@ -303,18 +304,18 @@ const Profile = () => {
             />
           </div>
           {/* Mobile Navbar */}
-          <div className="md:hidden flex items-center justify-between w-full">
+          <div className="md:hidden flex items-center justify-between w-full py-4">
             <div
-              className="flex items-center justify-center bg-pc_blue text-white rounded-full cursor-pointer"
+              className="flex items-center justify-center text-white rounded-full cursor-pointer"
               onClick={toggleMobileSidebar}
             >
-              <img src={Plc} alt="Company Logo" className="w-10 h-10" />
+              <img src={Pluralcode} alt="Company Logo" className="w-[170px]" />
             </div>
             <button
               onClick={toggleMobileSidebar}
-              className="text-2xl cursor-pointer"
+              className="text-[28px] cursor-pointer bg-pc_blue text-pc_white_white p-1 rounded-full"
             >
-              {isMobileSidebarOpen ? <FaTimes /> : <FaBars />}
+              {isMobileSidebarOpen ? <FaTimes /> : <CgMenuRight />}
             </button>
           </div>
           <div className="hidden lg:flex items-center justify-center gap-2">

@@ -98,6 +98,12 @@ const HelpCenter = () => {
     };
   }, []);
 
+  const getLinkClasses2 = (path) => {
+    return location.pathname === path
+      ? "bg-white text-pc_orange border-l-4 border-pc_orange"
+      : "text-pc_black";
+  };
+
   // Function to get initials from the user's name
   const getInitials = (name) => {
     const nameArray = name.split(" ");
@@ -219,7 +225,7 @@ const HelpCenter = () => {
             isNavScrolled ? "border-b border-pc_light_gray/30" : ""
           }`}
         >
-          <div className="relative hidden lg:block lg:invisible">
+          <div className="relative hidden md:block lg:invisible">
             <IoMdSearch
               size={20}
               className="absolute top-[50%] left-3 -translate-y-[50%] text-[#898989] "
@@ -291,7 +297,7 @@ const HelpCenter = () => {
 
         {/* Main Content */}
         <div className="flex-1 p-8 bg-pc_bg font-gilroy" id="main-content">
-          <div className="flex flex-col items-center justify-start w-full md:w-[70%] mx-auto">
+          <div className="flex flex-col items-center justify-start w-full lg:w-[70%] mx-auto">
             <h1 className="font-gilroy_semibold text-[40px] text-pc_blue mt-8">
               Student Help Desk
             </h1>
@@ -332,20 +338,31 @@ const HelpCenter = () => {
       <div
         className={`${
           isMobileSidebarOpen ? "block" : "hidden"
-        } bg-white text-pc_black w-64 fixed top-0 left-0 h-full md:hidden transition-all duration-300`}
+        } bg-pc_bg text-pc_black w-[80%] fixed top-0 left-0 h-full md:hidden transition-all duration-300 py-[31px]`}
       >
-        <div className="flex justify-between items-center w-full px-2">
-          <img
-            src={Pluralcode}
-            alt="Expanded"
-            onClick={toggleMobileSidebar}
-            className="cursor-pointer p-5"
-          />
+        <div className="flex justify-between items-center px-6">
+          <div className="flex items-center justify-center gap-3 ">
+            <div className="bg-blue-100 p-2 rounded-full">
+              <div className="bg-pc_blue text-white p-4 rounded-full flex items-center justify-center h-11 w-11">
+                <span className="leading-none font-gilroy_semibold">
+                  {getInitials(user.name)}
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-col items-start justify-start leading-tight">
+              <span className="font-gilroy_semibold font-medium">
+                {user.name}
+              </span>
+              <span className="font-gilroy_light mt-1">
+                {user.student_id_number}
+              </span>
+            </div>
+          </div>
         </div>
-        <ul className="mt-4 w-full font-gilroy">
+        <ul className="mt-4 w-full font-gilroy bg-pc_bg pt-16">
           <Link
             to="/dashboard"
-            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses(
+            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses2(
               "/dashboard"
             )}`}
             onClick={toggleMobileSidebar}
@@ -357,7 +374,7 @@ const HelpCenter = () => {
           </Link>
           <Link
             to="/profile"
-            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses(
+            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses2(
               "/profile"
             )}`}
             onClick={toggleMobileSidebar}
@@ -372,7 +389,7 @@ const HelpCenter = () => {
             to="/help_center"
             className={`flex items-center ${
               isSidebarOpen ? "justify-start pl-8" : "justify-center"
-            } py-5 ${getLinkClasses("/help_center")}`}
+            } py-5 ${getLinkClasses2("/help_center")}`}
           >
             {isSidebarOpen ? (
               <div className="flex items-center gap-2 text-[18px]">
@@ -400,16 +417,6 @@ const HelpCenter = () => {
             </div>
           </button>
         </ul>
-        <div className="flex items-center justify-center gap-3 mt-20">
-          <div className="flex flex-col items-start justify-start leading-tight">
-            <span className="font-gilroy_semibold font-medium">
-              {user.name}
-            </span>
-            <span className="font-gilroy_light mt-1">
-              {user.student_id_number}
-            </span>
-          </div>
-        </div>
       </div>
     </div>
   );
