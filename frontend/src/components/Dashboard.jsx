@@ -365,7 +365,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-        <div className="w-full lg:hidden bg-pc_white_white py-6 flex items-center justify-center">
+        <div className="w-full md:hidden bg-pc_white_white py-6 flex items-center justify-center">
           <h1 className="font-gilroy text-[20px] w-full text-center">
             My Courses
           </h1>
