@@ -12,23 +12,28 @@ import { FaSlack } from "react-icons/fa";
 import { CourseContext } from "../context/CourseContext";
 import { TfiHelpAlt } from "react-icons/tfi";
 import { HiUser } from "react-icons/hi2";
+import PaymentStatus from "./PaymentStatus";
+import Resources from "./Resources";
 
 const CourseModule = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isNavScrolled, setIsNavScrolled] = useState(false); // State to track if the main content is scrolled
   const [isDetailsVisible, setIsDetailsVisible] = useState(false); // State to track visibility of the div
+  const [currentView, setCurrentView] = useState("modules"); // State to track current view
 
   const location = useLocation();
   const navigate = useNavigate();
 
   const { userData } = useContext(AuthContext); // Access user data
 
-  const { courseData, studyMaterials } = useContext(CourseContext); // Use courseData from CourseContext
+  const { courseData, studyMaterials, dashboardData } =
+    useContext(CourseContext); // Use courseData from CourseContext
 
   useEffect(() => {
     console.log(courseData); // Console log the courseData to see the fetched data
     console.log(studyMaterials); // Console log the courseData to see the fetched data
+    console.log("dashboard:", dashboardData);
   }, [courseData]);
 
   const toggleSidebar = () => {
@@ -57,6 +62,7 @@ const CourseModule = () => {
   const { enrolledcourses, message, token, totalbalance, user } = userData;
 
   const [course, setCourse] = useState(null);
+  const [selectedCourse, setSelectedCourse] = useState(null);
 
   useEffect(() => {
     // Retrieve course information from local storage
@@ -64,7 +70,15 @@ const CourseModule = () => {
     if (storedCourse) {
       setCourse(JSON.parse(storedCourse));
     }
-  }, []);
+
+    if (dashboardData && dashboardData.enrolledcourses && storedCourse) {
+      const parsedStoredCourse = JSON.parse(storedCourse);
+      const foundCourse = dashboardData.enrolledcourses.find(
+        (enrolledCourse) => enrolledCourse.id === parsedStoredCourse.id
+      );
+      setSelectedCourse(foundCourse);
+    }
+  }, [dashboardData]);
 
   // Handle scroll event to detect if the main content is scrolled
   useEffect(() => {
@@ -289,12 +303,12 @@ const CourseModule = () => {
               </span>
               <span>Go Back</span>
             </button>
-            {course && course.course_community_link && (
+            {selectedCourse && selectedCourse.course_community_link && (
               <a
-                href={course.course_community_link}
+                href={selectedCourse.course_community_link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className=" rounded-lg  px-10 py-3  bg-pc_orange text-white font-gilroy_semibold font-semibold hover:shadow-md hover:outline hover:outline-slate-200 transition-shadow duration-150 ease-linear flex items-center justify-center gap-2 w-full md:w-auto"
+                className="rounded-lg px-10 py-3 bg-pc_orange text-white font-gilroy_semibold font-semibold hover:shadow-md hover:outline hover:outline-slate-200 transition-shadow duration-150 ease-linear flex items-center justify-center gap-2 w-full md:w-auto"
               >
                 <span>
                   <FaSlack />
@@ -303,31 +317,76 @@ const CourseModule = () => {
               </a>
             )}
           </div>
-          <div className="border bg-pc_white_white rounded-xl mt-8 p-5 md:p-8">
-            {course ? (
-              <>
+          <div className="bg-pc_white_white rounded-xl">
+            {/* Course Name and Type */}
+            {currentView === "modules" && course ? (
+              <div className="mt-8">
                 <h2 className="text-[32px] text-pc_blue font-gilroy_semibold mb-4">
                   {course.course_name}
                 </h2>
                 <p className="text-gray-600 mb-2">
                   Course Type: {course.course_type}
                 </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {course.course_module.map((module, index) => (
-                    <div
-                      key={index}
-                      className="p-2 border border-gray-200 rounded-md"
-                    >
-                      <h3 className="text-lg font-semibold">{module.name}</h3>
-                      <p className="text-gray-600">Module ID: {module.id}</p>
-                      {/* Add more module details as needed */}
-                    </div>
-                  ))}
+              </div>
+            ) : null}
+
+            {/* Toggle Buttons */}
+            <div className="flex justify-start items-end mt-8 bg-pc_bg h-[75px]">
+              <button
+                className={`px-6 py-2 font-gilroy_semibold border-b-2 ${
+                  currentView === "modules"
+                    ? "text-pc_orange border-pc_orange"
+                    : "text-pc_blue"
+                }`}
+                onClick={() => setCurrentView("modules")}
+              >
+                Course Modules
+              </button>
+              <button
+                className={`px-6 py-2 font-gilroy_semibold border-b-2 ${
+                  currentView === "resources"
+                    ? "text-pc_orange border-pc_orange"
+                    : "text-pc_blue"
+                }`}
+                onClick={() => setCurrentView("resources")}
+              >
+                Resources
+              </button>
+              <button
+                className={`px-6 py-2 font-gilroy_semibold border-b-2 ${
+                  currentView === "payment"
+                    ? "text-pc_orange border-pc_orange"
+                    : "text-pc_blue"
+                }`}
+                onClick={() => setCurrentView("payment")}
+              >
+                Payment Status
+              </button>
+            </div>
+
+            {/* Conditional Content */}
+            <div className="border bg-pc_white_white rounded-xl mt-8 p-5 md:p-8 w-full">
+              {currentView === "modules" && course ? (
+                <div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {course.course_module.map((module, index) => (
+                      <div
+                        key={index}
+                        className="p-2 border border-gray-200 rounded-md"
+                      >
+                        <h3 className="text-lg font-semibold">{module.name}</h3>
+                        <p className="text-gray-600">Module ID: {module.id}</p>
+                        {/* Add more module details as needed */}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </>
-            ) : (
-              <p>Loading...</p>
-            )}
+              ) : currentView === "resources" ? (
+                <Resources />
+              ) : (
+                <PaymentStatus />
+              )}
+            </div>
           </div>
         </div>
       </div>
