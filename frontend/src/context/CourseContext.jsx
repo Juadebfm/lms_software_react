@@ -4,13 +4,12 @@ export const CourseContext = createContext();
 
 export const CourseProvider = ({ children }) => {
   const [courseData, setCourseData] = useState(null);
-  const [secondAPIData, setSecondAPIData] = useState([]);
-  const userData = JSON.parse(localStorage.getItem("user")); // Get user data from local storage
+  const [studyMaterials, setStudyMaterials] = useState({});
+  const [dashboardData, setDashboardData] = useState(null); // State to store result from dashboard API
+  const userData = JSON.parse(localStorage.getItem("user"));
   const token = userData?.token;
 
   useEffect(() => {
-    console.log("First useEffect hook executed");
-
     if (token) {
       fetch("https://backend.pluralcode.institute/student/dashboard-api", {
         method: "GET",
@@ -22,81 +21,70 @@ export const CourseProvider = ({ children }) => {
         .then((result) => {
           console.log("Result from dashboard-api:", result);
           setCourseData(result);
+          setDashboardData(result); // Store the result from dashboard API
         })
         .catch((error) => console.log("Error from dashboard-api:", error));
     }
   }, [token]);
 
   useEffect(() => {
-    console.log("Second useEffect hook executed");
-
     if (token && courseData) {
-      const teachable_course_id = courseData.teachable_course_id;
-      const enrolledCourses = courseData.enrolledcourses;
+      courseData.enrolledcourses.forEach((course) => {
+        const courseId = course.teachable_course_id;
+        const courseName = course.course_name;
 
-      // Ensure teachable_course_id and enrolledCourses are available
-      if (
-        teachable_course_id &&
-        enrolledCourses &&
-        enrolledCourses.length > 0
-      ) {
-        // Constructing the lectures array
-        const lectures = enrolledCourses.flatMap((course) =>
-          course.course_module.map((module) => ({
-            id: module.id,
-            position: module.position,
-          }))
-        );
+        course.course_module.forEach((module) => {
+          const lectures = module.lectures.map((lecture) => ({
+            id: lecture.id,
+            position: lecture.position,
+          }));
 
-        console.log("lectures", lectures);
+          const myHeaders = new Headers();
+          myHeaders.append("Content-Type", "application/json");
+          myHeaders.append("Authorization", `Bearer ${token}`);
 
-        const myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
-
-        const raw = JSON.stringify({
-          course_id: teachable_course_id,
-          lectures: lectures,
-        });
-
-        console.log("raw", raw);
-
-        const requestOptions = {
-          method: "POST",
-          headers: myHeaders,
-          body: raw,
-          redirect: "follow",
-        };
-
-        // Perform second API call to study-materials endpoint
-        fetch(
-          "https://backend.pluralcode.institute/student/study-materials",
-          requestOptions
-        )
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Network response was not ok");
-            }
-            return response.json();
-          })
-          .then((result) => {
-            console.log("Result from second API call:", result);
-            setSecondAPIData(result); // Store result of second API call in state
-          })
-          .catch((error) => {
-            console.error("Error from second API call:", error);
-            console.log("Error object:", error);
-            // Optionally handle the error or set state to indicate error
+          const raw = JSON.stringify({
+            course_id: courseId,
+            lectures: lectures,
           });
-      } else {
-        console.log(
-          "Cannot make second API call. Missing teachable_course_id or enrolledCourses data."
-        );
-      }
+
+          const requestOptions = {
+            method: "POST",
+            headers: myHeaders,
+            body: raw,
+            redirect: "follow",
+          };
+
+          fetch(
+            "https://backend.pluralcode.institute/student/study-materials",
+            requestOptions
+          )
+            .then((response) => response.json())
+            .then((result) => {
+              console.log(
+                `Result for ${courseName} from second API call:`,
+                result
+              );
+              setStudyMaterials((prevMaterials) => ({
+                ...prevMaterials,
+                [courseName]: result,
+              }));
+            })
+            .catch((error) => {
+              console.error(
+                `Error for ${courseName} from second API call:`,
+                error
+              );
+            });
+        });
+      });
     }
   }, [token, courseData]);
 
   return (
-    <CourseContext.Provider value={{ courseData, secondAPIData }}>
+    <CourseContext.Provider
+      value={{ courseData, studyMaterials, dashboardData }}
+    >
       {children}
     </CourseContext.Provider>
   );

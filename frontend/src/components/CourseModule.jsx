@@ -24,11 +24,11 @@ const CourseModule = () => {
 
   const { userData } = useContext(AuthContext); // Access user data
 
-  const { courseData, secondAPIData } = useContext(CourseContext); // Use courseData from CourseContext
+  const { courseData, studyMaterials } = useContext(CourseContext); // Use courseData from CourseContext
 
   useEffect(() => {
     console.log(courseData); // Console log the courseData to see the fetched data
-    console.log(secondAPIData); // Console log the courseData to see the fetched data
+    console.log(studyMaterials); // Console log the courseData to see the fetched data
   }, [courseData]);
 
   const toggleSidebar = () => {
@@ -275,7 +275,10 @@ const CourseModule = () => {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-8 bg-pc_bg font-gilroy overflow-y-auto" id="main-content">
+        <div
+          className="flex-1 p-8 bg-pc_bg font-gilroy overflow-y-auto"
+          id="main-content"
+        >
           <div className="w-full flex items-center justify-between">
             <button
               onClick={handleGoBack}

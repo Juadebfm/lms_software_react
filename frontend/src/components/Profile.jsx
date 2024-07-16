@@ -15,15 +15,28 @@ import { CgMenuRight } from "react-icons/cg";
 const Profile = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [isDetailsVisible, setIsDetailsVisible] = useState(false); // State to track visibility of the div
-
-  const [isNavScrolled, setIsNavScrolled] = useState(false); // State to track if the main content is scrolled
+  const [isDetailsVisible, setIsDetailsVisible] = useState(false);
+  const [isNavScrolled, setIsNavScrolled] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [fileInput, setFileInput] = useState(null); // State to hold file input reference
+  const [selectedOption, setSelectedOption] = useState("");
+
+  const [refname1, setRefname1] = useState("");
+  const [refphone1, setRefphone1] = useState("");
+  const [refname2, setRefname2] = useState("");
+  const [refphone2, setRefphone2] = useState("");
+
+  const [refname1Error, setRefname1Error] = useState(false);
+  const [refphone1Error, setRefphone1Error] = useState(false);
+  const [refname2Error, setRefname2Error] = useState(false);
+  const [refphone2Error, setRefphone2Error] = useState(false);
+  const [fileInputError, setFileInputError] = useState(false);
+  const [selectedOptionError, setSelectedOptionError] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -79,10 +92,6 @@ const Profile = () => {
     date,
     name,
     password,
-    refname1,
-    refname2,
-    refphone1,
-    refphone2,
   } = user;
 
   const [currentPassword, setCurrentPassword] = useState("");
@@ -181,6 +190,82 @@ const Profile = () => {
         setIsLoading(false);
         setError("Failed to update password.");
       });
+  };
+
+  const saveChanges = () => {
+    setError("");
+    setRefname1Error(false);
+    setRefphone1Error(false);
+    setRefname2Error(false);
+    setRefphone2Error(false);
+    setFileInputError(false);
+    setSelectedOptionError(false);
+
+    if (
+      !refname1 ||
+      !refphone1 ||
+      !refname2 ||
+      !refphone2 ||
+      !fileInput ||
+      !selectedOption ||
+      selectedOption === "Select ID Type"
+    ) {
+      setError("All fields are required.");
+
+      if (!refname1) setRefname1Error(true);
+      if (!refphone1) setRefphone1Error(true);
+      if (!refname2) setRefname2Error(true);
+      if (!refphone2) setRefphone2Error(true);
+      if (!fileInput) setFileInputError(true);
+      if (!selectedOption || selectedOption === "Select ID Type")
+        setSelectedOptionError(true);
+
+      return;
+    }
+
+    const formdata = new FormData();
+    formdata.append("refname1", refname1);
+    formdata.append("refphone1", refphone1);
+    formdata.append("refname2", refname2);
+    formdata.append("refphone2", refphone2);
+    formdata.append("image", fileInput.files[0], "hello.png");
+    formdata.append("idname", "passport");
+
+    const requestOptions = {
+      method: "PUT",
+      body: formdata,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      redirect: "follow",
+    };
+
+    setIsLoading(true);
+
+    fetch(
+      "https://backend.pluralcode.institute/student/upload-reference-details",
+      requestOptions
+    )
+      .then((response) => {
+        setIsLoading(false);
+        if (!response.ok)
+          throw new Error("Failed to update reference details.");
+        return response.text();
+      })
+      .then(() => {
+        setIsSuccess(true);
+        setTimeout(() => {
+          setIsSuccess(false);
+        }, 3000);
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        setError(error.message || "Failed to update reference details.");
+      });
+  };
+
+  const handleSelectChange = (e) => {
+    setSelectedOption(e.target.value);
   };
 
   return (
@@ -480,9 +565,13 @@ const Profile = () => {
                   </label>
                   <input
                     type="text"
-                    className="rounded-lg mt-2 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
-                    defaultValue={refname1}
-                    readOnly
+                    id="refname1"
+                    className={`rounded-lg mt-2 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border ${
+                      refname1Error ? "border-red-500" : "border-[#939393]"
+                    }`}
+                    value={refname1}
+                    onChange={(e) => setRefname1(e.target.value)}
+                    placeholder="Type emergency name"
                   />
                 </div>
                 <div className="flex flex-col items-start justify-start">
@@ -493,10 +582,13 @@ const Profile = () => {
                     Emergency Phone Number
                   </label>
                   <input
-                    type="text"
-                    className="rounded-lg mt-2 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
-                    defaultValue={refphone1}
-                    readOnly
+                    type="tel"
+                    className={`rounded-lg mt-2 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border ${
+                      refphone1Error ? "border-red-500" : "border-[#939393]"
+                    }`}
+                    value={refphone1}
+                    onChange={(e) => setRefphone1(e.target.value)}
+                    placeholder="Type emergency phone number"
                   />
                 </div>
               </div>
@@ -518,9 +610,12 @@ const Profile = () => {
                   </label>
                   <input
                     type="text"
-                    className="rounded-lg mt-2 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
-                    defaultValue={refname2}
-                    readOnly
+                    className={`rounded-lg mt-2 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border ${
+                      refname2Error ? "border-red-500" : "border-[#939393]"
+                    }`}
+                    value={refname2}
+                    onChange={(e) => setRefname2(e.target.value)}
+                    placeholder="Type emergency name"
                   />
                 </div>
                 <div className="flex flex-col items-start justify-start">
@@ -531,10 +626,13 @@ const Profile = () => {
                     Reference Phone Number
                   </label>
                   <input
-                    type="text"
-                    className="rounded-lg mt-2 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393]"
-                    defaultValue={refphone2}
-                    readOnly
+                    type="tel"
+                    className={`rounded-lg mt-2 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border ${
+                      refphone2Error ? "border-red-500" : "border-[#939393]"
+                    }`}
+                    value={refphone2}
+                    onChange={(e) => setRefphone2(e.target.value)}
+                    placeholder="Type emergency phone number"
                   />
                 </div>
               </div>
@@ -548,41 +646,29 @@ const Profile = () => {
               <div className="mt-7 w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="flex flex-col items-start justify-start">
                   <label
-                    htmlFor="id_type"
+                    htmlFor="select-option"
                     className="font-gilroy_light font-extralight"
                   >
-                    Select ID Type
+                    Select Option
                   </label>
-                  <div className="relative w-full">
-                    <select
-                      name="id_type"
-                      className="appearance-none rounded-lg mt-2 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border border-[#939393] bg-transparent"
-                    >
-                      <option value="Select ID Type">Select ID Type</option>
-                      <option value="International Passport">
-                        International Passport
-                      </option>
-                      <option value="Driver's license">Driver's license</option>
-                      <option value="Voters Card">Voters Card</option>
-                      <option value="NIMC ID card">NIMC ID card</option>
-                      <option value="NIN Slip">NIN Slip</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                      <svg
-                        className="h-5 w-5 text-gray-400"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 12a1 1 0 01-.707-.293l-4-4a1 1 0 111.414-1.414L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4A1 1 0 0110 12z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </div>
-                  </div>
+                  <select
+                    id="select-option"
+                    className={`rounded-lg mt-2 px-6 py-4 w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border ${
+                      error && !selectedOption
+                        ? "border-red-500"
+                        : "border-[#939393]"
+                    }`}
+                    onChange={handleSelectChange}
+                  >
+                    <option value="Select ID Type">Select ID Type</option>
+                    <option value="International Passport">
+                      International Passport
+                    </option>
+                    <option value="Driver's license">Driver's license</option>
+                    <option value="Voters Card">Voters Card</option>
+                    <option value="NIMC ID card">NIMC ID card</option>
+                    <option value="NIN Slip">NIN Slip</option>
+                  </select>
                 </div>
 
                 <div className="flex flex-col items-start justify-start">
@@ -593,22 +679,48 @@ const Profile = () => {
                     Upload File
                   </label>
                   <div className="relative w-full">
-                    <input type="file" id="file-upload" className="hidden" />
-                    <label
-                      htmlFor="file-upload"
-                      className="cursor-pointer block bg-white rounded-lg mt-2 px-6 py-4 w-full border border-[#939393] relative"
-                      style={{ minHeight: "56px" }} // Ensures consistent height
-                    >
-                      <HiPlus className="h-6 w-6 absolute top-1/2 transform -translate-y-1/2 right-4 text-pc_orange cursor-pointer" />
-                    </label>
+                    <input
+                      type="file"
+                      id="file-upload"
+                      className={`rounded-lg mt-2 px-6 py-[10px] w-full placeholder:text-[#939393] placeholder:font-gilroy_light placeholder:font-extralight placeholder:text-[15px] border ${
+                        error && !fileInput
+                          ? "border-red-500"
+                          : "border-[#939393]"
+                      }`}
+                      onChange={(e) => setFileInput(e.target)}
+                      accept=".png, .jpg, .jpeg, .svg"
+                    />
                   </div>
                 </div>
               </div>
             </div>
 
-            <button className="mb-4 mt-20 rounded-lg px-6 py-4 w-full lg:w-[355px] bg-pc_orange text-white font-gilroy_semibold font-semibold hover:shadow-md hover:outline hover:outline-slate-200 transition-shadow duration-150 ease-linear flex items-center justify-center gap-2">
-              Save Changes
+            {/* Error message */}
+            {error && <p className="text-red-500 mt-4">{error}</p>}
+
+            <button
+              onClick={saveChanges}
+              className="mb-4 mt-20 rounded-lg px-6 py-4 w-full lg:w-[355px] bg-pc_orange text-white font-gilroy_semibold font-semibold hover:shadow-md hover:outline hover:outline-slate-200 transition-shadow duration-150 ease-linear flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <span>Saving...</span>
+                  <TbRotateClockwise2 className="text-xl animate-spin" />
+                </>
+              ) : (
+                "Save Changes"
+              )}
             </button>
+
+            {/* Success message */}
+            {isSuccess && (
+              <p className="text-green-500 mt-4">Changes saved successfully.</p>
+            )}
+
+            {/* Loading indicator */}
+            {isLoading && (
+              <p className="text-blue-500 mt-4">Saving changes...</p>
+            )}
           </div>
         </div>
       </div>
