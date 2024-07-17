@@ -19,6 +19,7 @@ import { HiChevronRight, HiUser } from "react-icons/hi2";
 import { HiChevronDown } from "react-icons/hi2";
 import { IoIosArrowRoundForward } from "react-icons/io";
 import { TfiHelpAlt } from "react-icons/tfi";
+import LoadingModal from "./LoadingModal";
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -28,6 +29,7 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("courses");
 
   const location = useLocation();
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { userData } = useContext(AuthContext); // Access user data
 
@@ -73,8 +75,6 @@ const Dashboard = () => {
     setIsDetailsVisible((prev) => !prev);
   };
 
-  console.log(userData); // Log user data
-
   const { enrolledcourses, message, token, totalbalance, user } = userData;
 
   const {
@@ -93,12 +93,6 @@ const Dashboard = () => {
   const capitalizedEmail = email.charAt(0).toUpperCase() + email.slice(1);
 
   const userDetails = enrolledcourses[1];
-
-  console.log("Enrolled courses:", enrolledcourses);
-  console.log(message);
-  console.log(token);
-  console.log(totalbalance);
-  console.log(user);
 
   // Determine the number of courses
   const numberOfCourses = enrolledcourses.reduce((count, element) => {
@@ -180,12 +174,108 @@ const Dashboard = () => {
     },
   ];
 
-  const handleClickCourse = (course) => {
-    // Store course information in local storage
-    localStorage.setItem("selectedCourse", JSON.stringify(course));
+  const handleCourseClick = async (course) => {
+    if (
+      !course ||
+      !course.teachable_course_id ||
+      !Array.isArray(course.course_module)
+    ) {
+      console.error("Invalid course data:", course);
+      return;
+    }
 
-    // Navigate to the course module page (replace with your actual route)
-    navigate(`/courses/${course.id}`);
+    const { teachable_course_id, course_name, course_module } = course;
+
+    // Check if groupedStudyMaterials data exists in localStorage
+    const storedData = localStorage.getItem("groupedStudyMaterials");
+    if (storedData) {
+      console.log("Using cached study materials data from localStorage");
+      navigate(`/courses/${teachable_course_id}`);
+      return;
+    }
+
+    // Show loading modal
+    setLoading(true);
+
+    // Prepare an array to store promises of study material requests
+    const studyMaterialPromises = [];
+
+    // Iterate over each module in course_module
+    course_module.forEach((module) => {
+      if (module.lectures && Array.isArray(module.lectures)) {
+        const lectures = module.lectures.map((lecture) => ({
+          id: lecture.id,
+          position: lecture.position,
+        }));
+
+        const requestBody = {
+          course_id: teachable_course_id,
+          lectures: lectures,
+        };
+
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+        myHeaders.append("Authorization", `Bearer ${token}`); // Assuming token is defined somewhere
+
+        const requestOptions = {
+          method: "POST",
+          headers: myHeaders,
+          body: JSON.stringify(requestBody),
+          redirect: "follow",
+        };
+
+        studyMaterialPromises.push(
+          fetch(
+            "https://backend.pluralcode.institute/student/study-materials",
+            requestOptions
+          )
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Network response was not ok");
+              }
+              return response.json();
+            })
+            .then((result) => ({
+              module: module,
+              studyMaterials: result,
+            }))
+            .catch((error) => {
+              console.error(
+                `Error fetching study materials for module ${module.id}:`,
+                error
+              );
+              return { module: module, studyMaterials: [] };
+            })
+        );
+      }
+    });
+
+    try {
+      const moduleStudyMaterials = await Promise.all(studyMaterialPromises);
+
+      const groupedData = {
+        courseName: course_name,
+        courseModules: moduleStudyMaterials.map(
+          ({ module, studyMaterials }) => ({
+            moduleId: module.id,
+            moduleName: module.name,
+            studyMaterials: studyMaterials,
+          })
+        ),
+      };
+
+      localStorage.setItem(
+        "groupedStudyMaterials",
+        JSON.stringify(groupedData)
+      );
+
+      setLoading(false); // Hide loading modal
+
+      navigate(`/courses/${teachable_course_id}`);
+    } catch (error) {
+      console.error("Error fetching study materials:", error);
+      setLoading(false); // Hide loading modal on error
+    }
   };
 
   return (
@@ -475,7 +565,7 @@ const Dashboard = () => {
 
                         <button
                           className="mt-5 flex items-center justify-center gap-1 leading-none cursor-pointer text-pc_orange"
-                          onClick={() => handleClickCourse(course)}
+                          onClick={() => handleCourseClick(course)}
                         >
                           <span>Start Learning</span>
                           <span>
@@ -622,6 +712,8 @@ const Dashboard = () => {
           </button>
         </ul>
       </div>
+
+      {loading && <LoadingModal />}
     </div>
   );
 };

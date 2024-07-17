@@ -9,11 +9,12 @@ import { TbLogout } from "react-icons/tb";
 import { MdDashboard } from "react-icons/md";
 import { AuthContext } from "../context/AuthContext";
 import { FaSlack } from "react-icons/fa";
-import { CourseContext } from "../context/CourseContext";
 import { TfiHelpAlt } from "react-icons/tfi";
 import { HiUser } from "react-icons/hi2";
 import PaymentStatus from "./PaymentStatus";
 import Resources from "./Resources";
+import moduleImg from "../assets/moduleimage.png";
+import { StudyMaterialsContext } from "../context/StudyMaterialsContext";
 
 const CourseModule = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -26,15 +27,6 @@ const CourseModule = () => {
   const navigate = useNavigate();
 
   const { userData } = useContext(AuthContext); // Access user data
-
-  const { courseData, studyMaterials, dashboardData } =
-    useContext(CourseContext); // Use courseData from CourseContext
-
-  useEffect(() => {
-    console.log(courseData); // Console log the courseData to see the fetched data
-    console.log(studyMaterials); // Console log the courseData to see the fetched data
-    console.log("dashboard:", dashboardData);
-  }, [courseData]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -63,22 +55,6 @@ const CourseModule = () => {
 
   const [course, setCourse] = useState(null);
   const [selectedCourse, setSelectedCourse] = useState(null);
-
-  useEffect(() => {
-    // Retrieve course information from local storage
-    const storedCourse = localStorage.getItem("selectedCourse");
-    if (storedCourse) {
-      setCourse(JSON.parse(storedCourse));
-    }
-
-    if (dashboardData && dashboardData.enrolledcourses && storedCourse) {
-      const parsedStoredCourse = JSON.parse(storedCourse);
-      const foundCourse = dashboardData.enrolledcourses.find(
-        (enrolledCourse) => enrolledCourse.id === parsedStoredCourse.id
-      );
-      setSelectedCourse(foundCourse);
-    }
-  }, [dashboardData]);
 
   // Handle scroll event to detect if the main content is scrolled
   useEffect(() => {
@@ -109,6 +85,8 @@ const CourseModule = () => {
   const toggleDetailsVisibility = () => {
     setIsDetailsVisible((prev) => !prev);
   };
+
+  const { groupedStudyMaterials } = useContext(StudyMaterialsContext);
 
   return (
     <div className="flex h-screen">
@@ -292,103 +270,7 @@ const CourseModule = () => {
         <div
           className="flex-1 p-8 bg-pc_bg font-gilroy overflow-y-auto"
           id="main-content"
-        >
-          <div className="w-full flex items-center justify-between">
-            <button
-              onClick={handleGoBack}
-              className="hidden md:flex items-center justify-center p-2 rounded font-gilroy_semibold"
-            >
-              <span>
-                <IoIosArrowRoundBack />
-              </span>
-              <span>Go Back</span>
-            </button>
-            {selectedCourse && selectedCourse.course_community_link && (
-              <a
-                href={selectedCourse.course_community_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-lg px-10 py-3 bg-pc_orange text-white font-gilroy_semibold font-semibold hover:shadow-md hover:outline hover:outline-slate-200 transition-shadow duration-150 ease-linear flex items-center justify-center gap-2 w-full md:w-auto"
-              >
-                <span>
-                  <FaSlack />
-                </span>
-                <span>Cohort Community</span>
-              </a>
-            )}
-          </div>
-          <div className="bg-pc_white_white rounded-xl">
-            {/* Course Name and Type */}
-            {currentView === "modules" && course ? (
-              <div className="mt-8">
-                <h2 className="text-[32px] text-pc_blue font-gilroy_semibold mb-4">
-                  {course.course_name}
-                </h2>
-                <p className="text-gray-600 mb-2">
-                  Course Type: {course.course_type}
-                </p>
-              </div>
-            ) : null}
-
-            {/* Toggle Buttons */}
-            <div className="flex justify-start items-end mt-8 bg-pc_bg h-[75px]">
-              <button
-                className={`px-6 py-2 font-gilroy_semibold border-b-2 ${
-                  currentView === "modules"
-                    ? "text-pc_orange border-pc_orange"
-                    : "text-pc_blue"
-                }`}
-                onClick={() => setCurrentView("modules")}
-              >
-                Course Modules
-              </button>
-              <button
-                className={`px-6 py-2 font-gilroy_semibold border-b-2 ${
-                  currentView === "resources"
-                    ? "text-pc_orange border-pc_orange"
-                    : "text-pc_blue"
-                }`}
-                onClick={() => setCurrentView("resources")}
-              >
-                Resources
-              </button>
-              <button
-                className={`px-6 py-2 font-gilroy_semibold border-b-2 ${
-                  currentView === "payment"
-                    ? "text-pc_orange border-pc_orange"
-                    : "text-pc_blue"
-                }`}
-                onClick={() => setCurrentView("payment")}
-              >
-                Payment Status
-              </button>
-            </div>
-
-            {/* Conditional Content */}
-            <div className="border bg-pc_white_white rounded-xl mt-8 p-5 md:p-8 w-full">
-              {currentView === "modules" && course ? (
-                <div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {course.course_module.map((module, index) => (
-                      <div
-                        key={index}
-                        className="p-2 border border-gray-200 rounded-md"
-                      >
-                        <h3 className="text-lg font-semibold">{module.name}</h3>
-                        <p className="text-gray-600">Module ID: {module.id}</p>
-                        {/* Add more module details as needed */}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : currentView === "resources" ? (
-                <Resources />
-              ) : (
-                <PaymentStatus />
-              )}
-            </div>
-          </div>
-        </div>
+        ></div>
       </div>
 
       {/* Mobile Sidebar */}

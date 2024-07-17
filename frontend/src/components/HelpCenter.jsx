@@ -10,7 +10,6 @@ import { CiUser } from "react-icons/ci";
 import { MdDashboard } from "react-icons/md";
 import { AuthContext } from "../context/AuthContext";
 import { FaSlack } from "react-icons/fa";
-import { CourseContext } from "../context/CourseContext";
 import { TfiHelpAlt } from "react-icons/tfi";
 import { HiUser } from "react-icons/hi2";
 
@@ -24,13 +23,6 @@ const HelpCenter = () => {
   const navigate = useNavigate();
 
   const { userData } = useContext(AuthContext); // Access user data
-
-  const { courseData, secondAPIData } = useContext(CourseContext); // Use courseData from CourseContext
-
-  useEffect(() => {
-    console.log(courseData); // Console log the courseData to see the fetched data
-    console.log(secondAPIData); // Console log the courseData to see the fetched data
-  }, [courseData]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
