@@ -15,6 +15,7 @@ import PaymentStatus from "./PaymentStatus";
 import Resources from "./Resources";
 import moduleImg from "../assets/moduleimage.png";
 import { StudyMaterialsContext } from "../context/StudyMaterialsContext";
+import { DashboardDataContext } from "../context/DashboardDataContext";
 
 const CourseModule = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -27,6 +28,7 @@ const CourseModule = () => {
   const navigate = useNavigate();
 
   const { userData } = useContext(AuthContext); // Access user data
+  const { dashboardData, loading, error } = useContext(DashboardDataContext);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -266,11 +268,21 @@ const CourseModule = () => {
           </div>
         </div>
 
-        {/* Main Content */}
         <div
           className="flex-1 p-8 bg-pc_bg font-gilroy overflow-y-auto"
           id="main-content"
-        ></div>
+        >
+          {loading ? (
+            <p>Loading...</p>
+          ) : error ? (
+            <p>{error}</p>
+          ) : (
+            <div>
+              {/* Render your dashboard data here */}
+              <pre>{JSON.stringify(dashboardData, null, 2)}</pre>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Mobile Sidebar */}
