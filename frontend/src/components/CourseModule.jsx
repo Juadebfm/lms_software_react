@@ -1,94 +1,76 @@
 import React, { useContext, useEffect, useState } from "react";
-import { FaBars, FaTimes } from "react-icons/fa";
 import { IoIosArrowRoundBack, IoMdSearch } from "react-icons/io";
-import { IoChevronDownSharp } from "react-icons/io5";
+import { IoChevronDownSharp, IoChevronUpSharp } from "react-icons/io5";
 import Pluralcode from "../assets/PluralCode.png";
 import Plc from "../assets/plc.png";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { TbLogout } from "react-icons/tb";
 import { MdDashboard } from "react-icons/md";
-import { AuthContext } from "../context/AuthContext";
-import { FaSlack } from "react-icons/fa";
-import { TfiHelpAlt } from "react-icons/tfi";
 import { HiUser } from "react-icons/hi2";
-import PaymentStatus from "./PaymentStatus";
-import Resources from "./Resources";
-import moduleImg from "../assets/moduleimage.png";
+import { AuthContext } from "../context/AuthContext";
+import { TfiHelpAlt } from "react-icons/tfi";
 import { StudyMaterialsContext } from "../context/StudyMaterialsContext";
 import { DashboardDataContext } from "../context/DashboardDataContext";
+import { FaBars, FaTimes } from "react-icons/fa";
+import { RiSlackLine } from "react-icons/ri";
 
 const CourseModule = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [isNavScrolled, setIsNavScrolled] = useState(false); // State to track if the main content is scrolled
-  const [isDetailsVisible, setIsDetailsVisible] = useState(false); // State to track visibility of the div
-  const [currentView, setCurrentView] = useState("modules"); // State to track current view
+  const [isNavScrolled, setIsNavScrolled] = useState(false);
+  const [isDetailsVisible, setIsDetailsVisible] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
 
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { userData } = useContext(AuthContext); // Access user data
-  const { dashboardData, loading, error } = useContext(DashboardDataContext);
+  const { userData } = useContext(AuthContext);
+  const { dashboardData } = useContext(DashboardDataContext);
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const toggleMobileSidebar = () => {
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleMobileSidebar = () =>
     setIsMobileSidebarOpen(!isMobileSidebarOpen);
-  };
-
-  const getLinkClasses = (path) => {
-    return location.pathname === path
-      ? "bg-pc_bg text-pc_orange border-l-4 border-pc_orange"
-      : "text-pc_black";
-  };
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
     navigate("/login");
   };
 
-  const handleGoBack = () => {
-    navigate(-1); // This will take the user back to the previous page
-  };
+  const handleGoBack = () => navigate(-1);
 
-  const { enrolledcourses, message, token, totalbalance, user } = userData;
-
-  const [course, setCourse] = useState(null);
-  const [selectedCourse, setSelectedCourse] = useState(null);
-
-  // Handle scroll event to detect if the main content is scrolled
   useEffect(() => {
-    const handleScroll = () => {
-      const mainContent = document.getElementById("main-content");
-      if (mainContent.scrollTop > 0) {
-        setIsNavScrolled(true);
-      } else {
-        setIsNavScrolled(false);
-      }
-    };
-
     const mainContent = document.getElementById("main-content");
-    mainContent.addEventListener("scroll", handleScroll);
+    const handleScroll = () => setIsNavScrolled(mainContent.scrollTop > 0);
 
-    return () => {
-      mainContent.removeEventListener("scroll", handleScroll);
-    };
+    mainContent.addEventListener("scroll", handleScroll);
+    return () => mainContent.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Function to get initials from the user's name
-  const getInitials = (name) => {
-    const nameArray = name.split(" ");
-    const initials = nameArray.map((n) => n[0]).join("");
-    return initials;
-  };
+  const getInitials = (name) =>
+    name
+      .split(" ")
+      .map((n) => n[0])
+      .join("");
 
-  const toggleDetailsVisibility = () => {
-    setIsDetailsVisible((prev) => !prev);
-  };
+  const toggleDetailsVisibility = () => setIsDetailsVisible((prev) => !prev);
 
-  const { groupedStudyMaterials } = useContext(StudyMaterialsContext);
+  useEffect(() => {
+    const courseId = location.state?.courseId;
+    if (courseId && dashboardData) {
+      const course = dashboardData.find((course) => course.id === courseId);
+      setSelectedCourse(course);
+    }
+  }, [location.state, dashboardData]);
+
+  useEffect(() => {
+    const courseFromLocalStorage = JSON.parse(
+      localStorage.getItem("clickedCourse")
+    );
+
+    if (courseFromLocalStorage) {
+      setSelectedCourse(courseFromLocalStorage);
+    }
+  }, []);
 
   return (
     <div className="flex h-screen">
@@ -122,7 +104,11 @@ const CourseModule = () => {
             to="/dashboard"
             className={`flex items-center ${
               isSidebarOpen ? "justify-start pl-8" : "justify-center"
-            } py-5 ${getLinkClasses("/dashboard")}`}
+            } py-5 ${
+              location.pathname === "/dashboard"
+                ? "bg-pc_bg text-pc_orange border-l-4 border-pc_orange"
+                : "text-pc_black"
+            }`}
           >
             {isSidebarOpen ? (
               <div className="flex items-center gap-2 text-[18px]">
@@ -139,7 +125,11 @@ const CourseModule = () => {
             to="/profile"
             className={`flex items-center ${
               isSidebarOpen ? "justify-start pl-8" : "justify-center"
-            } py-5 ${getLinkClasses("/profile")}`}
+            } py-5 ${
+              location.pathname === "/profile"
+                ? "bg-pc_bg text-pc_orange border-l-4 border-pc_orange"
+                : "text-pc_black"
+            }`}
           >
             {isSidebarOpen ? (
               <div className="flex items-center gap-2 text-[18px]">
@@ -156,12 +146,15 @@ const CourseModule = () => {
             to="/help_center"
             className={`flex items-center ${
               isSidebarOpen ? "justify-start pl-8" : "justify-center"
-            } py-5 ${getLinkClasses("/help_center")}`}
+            } py-5 ${
+              location.pathname === "/help_center"
+                ? "bg-pc_bg text-pc_orange border-l-4 border-pc_orange"
+                : "text-pc_black"
+            }`}
           >
             {isSidebarOpen ? (
               <div className="flex items-center gap-2 text-[18px]">
                 <TfiHelpAlt />
-
                 <span>Help Center</span>
               </div>
             ) : (
@@ -201,16 +194,14 @@ const CourseModule = () => {
           <div className="relative hidden lg:block">
             <IoMdSearch
               size={20}
-              className="absolute top-[50%] left-3 -translate-y-[50%] text-[#898989] "
+              className="absolute top-[50%] left-3 -translate-y-[50%] text-[#898989]"
             />
-
             <input
               type="text"
               placeholder="Search..."
               className="bg-pc_bg w-[400px] shadow-sm rounded-md py-3 placeholder:text-sm placeholder:text-[#898989] placeholder:font-gilroy pl-10"
             />
           </div>
-          {/* Mobile Navbar */}
           <div className="md:hidden flex items-center justify-between w-full">
             <div
               className="flex items-center justify-center bg-pc_blue text-white rounded-full cursor-pointer"
@@ -229,17 +220,17 @@ const CourseModule = () => {
             <div className="bg-blue-100 p-2 rounded-full">
               <div className="bg-pc_blue text-white p-4 rounded-full flex items-center justify-center h-11 w-11">
                 <span className="leading-none font-gilroy_semibold">
-                  {getInitials(user.name)}
+                  {getInitials(userData.user.name)}
                 </span>
               </div>
             </div>
             <div className="flex items-center justify-center gap-3">
               <div className="flex flex-col items-start justify-start leading-tight">
                 <span className="font-gilroy_semibold font-medium">
-                  {user.name}
+                  {userData.user.name}
                 </span>
                 <span className="font-gilroy_light mt-1">
-                  {user.student_id_number}
+                  {userData.user.student_id_number}
                 </span>
               </div>
               <div className="relative">
@@ -258,9 +249,9 @@ const CourseModule = () => {
                 )}
                 {isDetailsVisible && (
                   <div className="absolute top-10 font-gilroy_light p-6 right-0 flex flex-col mt-2 bg-white shadow-lg rounded-lg">
-                    <span>{capitalizedEmail}</span>
-                    <span>{state}</span>
-                    <span>{country}</span>
+                    <span>{userData.user.email}</span>
+                    <span>{userData.user.state}</span>
+                    <span>{userData.user.country}</span>
                   </div>
                 )}
               </div>
@@ -272,16 +263,30 @@ const CourseModule = () => {
           className="flex-1 p-8 bg-pc_bg font-gilroy overflow-y-auto"
           id="main-content"
         >
-          {loading ? (
-            <p>Loading...</p>
-          ) : error ? (
-            <p>{error}</p>
-          ) : (
-            <div>
-              {/* Render your dashboard data here */}
-              <pre>{JSON.stringify(dashboardData, null, 2)}</pre>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center justify-center gap-2 cursor-pointer">
+              <IoIosArrowRoundBack size={20} />
+
+              <button onClick={handleGoBack} className="text-[18px]">
+                Go Back
+              </button>
             </div>
-          )}
+            {selectedCourse ? (
+              <div>
+                <button
+                  className="mb-4 rounded-lg mt-3 px-6 py-4 w-full bg-pc_orange text-white font-gilroy_semibold font-semibold hover:shadow-md hover:outline hover:outline-slate-200 transition-shadow duration-150 ease-linear flex items-center justify-center gap-2"
+                  onClick={() =>
+                    window.open(selectedCourse.course_community_link, "_blank")
+                  }
+                >
+                  <RiSlackLine size={20} />
+                  Cohort Community
+                </button>
+              </div>
+            ) : (
+              <p></p>
+            )}
+          </div>
         </div>
       </div>
 
@@ -302,9 +307,11 @@ const CourseModule = () => {
         <ul className="mt-4 w-full font-gilroy">
           <Link
             to="/dashboard"
-            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses(
-              "/dashboard"
-            )}`}
+            className={`flex items-center justify-start py-5 pl-8 ${
+              location.pathname === "/dashboard"
+                ? "bg-pc_bg text-pc_orange border-l-4 border-pc_orange"
+                : "text-pc_black"
+            }`}
             onClick={toggleMobileSidebar}
           >
             <div className="flex items-center gap-2 text-[18px]">
@@ -314,9 +321,11 @@ const CourseModule = () => {
           </Link>
           <Link
             to="/profile"
-            className={`flex items-center justify-start py-5 pl-8 ${getLinkClasses(
-              "/profile"
-            )}`}
+            className={`flex items-center justify-start py-5 pl-8 ${
+              location.pathname === "/profile"
+                ? "bg-pc_bg text-pc_orange border-l-4 border-pc_orange"
+                : "text-pc_black"
+            }`}
             onClick={toggleMobileSidebar}
           >
             <div className="flex items-center gap-2 text-[18px]">
@@ -325,25 +334,19 @@ const CourseModule = () => {
             </div>
           </Link>
           <Link
-            onClick={toggleMobileSidebar}
             to="/help_center"
-            className={`flex items-center ${
-              isSidebarOpen ? "justify-start pl-8" : "justify-center"
-            } py-5 ${getLinkClasses("/help_center")}`}
+            className={`flex items-center py-5 pl-8 ${
+              location.pathname === "/help_center"
+                ? "bg-pc_bg text-pc_orange border-l-4 border-pc_orange"
+                : "text-pc_black"
+            }`}
+            onClick={toggleMobileSidebar}
           >
-            {isSidebarOpen ? (
-              <div className="flex items-center gap-2 text-[18px]">
-                <TfiHelpAlt />
-
-                <span>Help Center</span>
-              </div>
-            ) : (
-              <div className="text-2xl">
-                <TfiHelpAlt />
-              </div>
-            )}
+            <div className="flex items-center gap-2 text-[18px]">
+              <TfiHelpAlt />
+              <span>Help Center</span>
+            </div>
           </Link>
-
           <button
             onClick={() => {
               handleLogout();
@@ -360,10 +363,10 @@ const CourseModule = () => {
         <div className="flex items-center justify-center gap-3 mt-20">
           <div className="flex flex-col items-start justify-start leading-tight">
             <span className="font-gilroy_semibold font-medium">
-              {user.name}
+              {userData.user.name}
             </span>
             <span className="font-gilroy_light mt-1">
-              {user.student_id_number}
+              {userData.user.student_id_number}
             </span>
           </div>
         </div>

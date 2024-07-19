@@ -186,15 +186,27 @@ const Dashboard = () => {
 
     const { teachable_course_id, course_name, course_module } = course;
 
-    // Check if groupedStudyMaterials data exists in localStorage
+    // Store clicked course data in local storage
+    localStorage.setItem("clickedCourse", JSON.stringify(course));
+
+    // Check if study materials for the course are already stored
     const storedData = localStorage.getItem("groupedStudyMaterials");
     if (storedData) {
       console.log("Using cached study materials data from localStorage");
-      navigate(`/courses/${teachable_course_id}`);
-      return;
+      const groupedData = JSON.parse(storedData);
+
+      // Check if the clicked course data exists in stored data
+      const courseData = groupedData.courseModules.find(
+        (module) => module.courseId === teachable_course_id
+      );
+
+      if (courseData) {
+        navigate(`/courses/${teachable_course_id}`);
+        return;
+      }
     }
 
-    // Show loading modal
+    // If no stored data or course data is not found, fetch new data
     setLoading(true);
 
     // Prepare an array to store promises of study material requests
@@ -215,7 +227,7 @@ const Dashboard = () => {
 
         const myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
-        myHeaders.append("Authorization", `Bearer ${token}`); // Assuming token is defined somewhere
+        myHeaders.append("Authorization", `Bearer ${token}`);
 
         const requestOptions = {
           method: "POST",
@@ -257,6 +269,7 @@ const Dashboard = () => {
         courseName: course_name,
         courseModules: moduleStudyMaterials.map(
           ({ module, studyMaterials }) => ({
+            courseId: teachable_course_id, // Added courseId to match the check above
             moduleId: module.id,
             moduleName: module.name,
             studyMaterials: studyMaterials,
