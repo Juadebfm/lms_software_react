@@ -1,30 +1,26 @@
 import React, { useContext, useEffect, useState } from "react";
-import { IoIosArrowRoundBack, IoMdSearch } from "react-icons/io";
-import { IoChevronDownSharp, IoChevronUpSharp } from "react-icons/io5";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import ModuleImage from "../assets/moduleimage.png";
 import Pluralcode from "../assets/PluralCode.png";
-import Plc from "../assets/plc.png";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { TbLogout } from "react-icons/tb";
 import { MdDashboard } from "react-icons/md";
 import { HiUser } from "react-icons/hi2";
-import { AuthContext } from "../context/AuthContext";
 import { TfiHelpAlt } from "react-icons/tfi";
-import { StudyMaterialsContext } from "../context/StudyMaterialsContext";
-import { DashboardDataContext } from "../context/DashboardDataContext";
+import { TbLogout } from "react-icons/tb";
+import { IoIosArrowRoundBack, IoMdSearch } from "react-icons/io";
+import Plc from "../assets/plc.png";
 import { FaBars, FaTimes } from "react-icons/fa";
-import { RiSlackLine } from "react-icons/ri";
-import CourseModuleContainer from "./CourseModuleContainer";
+import { AuthContext } from "../context/AuthContext";
+import { DashboardDataContext } from "../context/DashboardDataContext";
+import { IoChevronDownSharp, IoChevronUpSharp } from "react-icons/io5";
 
-const CourseModule = () => {
+const ModuleVideoPage = () => {
+  const { moduleId } = useParams();
+  const [moduleData, setModuleData] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isNavScrolled, setIsNavScrolled] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isDetailsVisible, setIsDetailsVisible] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
-  const [activeSection, setActiveSection] = useState("courseModules");
-
-  const location = useLocation();
-  const navigate = useNavigate();
 
   const { userData } = useContext(AuthContext);
   const { dashboardData } = useContext(DashboardDataContext);
@@ -33,20 +29,14 @@ const CourseModule = () => {
   const toggleMobileSidebar = () =>
     setIsMobileSidebarOpen(!isMobileSidebarOpen);
 
+  const navigate = useNavigate();
+
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
     navigate("/login");
   };
 
   const handleGoBack = () => navigate(-1);
-
-  useEffect(() => {
-    const mainContent = document.getElementById("main-content");
-    const handleScroll = () => setIsNavScrolled(mainContent.scrollTop > 0);
-
-    mainContent.addEventListener("scroll", handleScroll);
-    return () => mainContent.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const getInitials = (name) =>
     name
@@ -57,23 +47,45 @@ const CourseModule = () => {
   const toggleDetailsVisibility = () => setIsDetailsVisible((prev) => !prev);
 
   useEffect(() => {
-    const courseId = location.state?.courseId;
-    if (courseId && dashboardData) {
-      const course = dashboardData.find((course) => course.id === courseId);
-      setSelectedCourse(course);
-    }
-  }, [location.state, dashboardData]);
-
-  useEffect(() => {
-    const courseFromLocalStorage = JSON.parse(
-      localStorage.getItem("clickedCourse")
+    const storedData = JSON.parse(
+      localStorage.getItem("groupedStudyMaterials")
     );
-
-    if (courseFromLocalStorage) {
-      setSelectedCourse(courseFromLocalStorage);
+    if (storedData) {
+      const module = storedData.courseModules.find(
+        (mod) => mod.moduleId === parseInt(moduleId)
+      );
+      setModuleData(module || null);
     }
-  }, []);
+  }, [moduleId]);
 
+  if (!moduleData) {
+    return <div>Loading...</div>;
+  }
+
+  const countStudyMaterials = (studyMaterials) => {
+    let videos = 0;
+    let pdfs = 0;
+    let quizzes = 0;
+
+    if (studyMaterials && studyMaterials.finalResult) {
+      studyMaterials.finalResult.forEach((item) => {
+        item.lecture.attachments.forEach((attachment) => {
+          if (attachment.kind === "video") {
+            videos += 1;
+          } else if (attachment.kind === "pdf_embed") {
+            pdfs += 1;
+          } else if (attachment.kind === "quiz") {
+            quizzes += 1;
+          }
+        });
+      });
+    }
+
+    return { videos, pdfs, quizzes };
+  };
+
+  const { studyMaterials } = moduleData;
+  const { videos, pdfs, quizzes } = countStudyMaterials(studyMaterials);
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
@@ -289,66 +301,15 @@ const CourseModule = () => {
               <p></p>
             )}
           </div>
-
-          <div className="bg-pc_white_white mt-8 p-10 rounded-t-xl min-h-screen">
-            <div className="text-[32px] font-gilroy_semibold text-pc_blue">
-              {selectedCourse ? <h1>{selectedCourse.course_name}</h1> : <p></p>}
-            </div>
-            {/* Main Toggle Buttons */}
-            <div className="flex items-end justify-start gap-4 mt-8 bg-pc_bg h-[75px] px-8 rounded-xl">
-              <button
-                onClick={() => setActiveSection("courseModules")}
-                className={`py-2 px-4 rounded font-gilroy ${
-                  activeSection === "courseModules"
-                    ? "text-pc_orange font-gilroy_semibold border-b-2 border-pc_orange"
-                    : "bg-transparent text-pc_blue"
-                }`}
-              >
-                Course Modules
-              </button>
-              <button
-                onClick={() => setActiveSection("resources")}
-                className={`py-2 px-4 rounded font-gilroy ${
-                  activeSection === "resources"
-                    ? "text-pc_orange font-gilroy_semibold border-b-2 border-pc_orange"
-                    : "bg-transparent text-pc_blue"
-                }`}
-              >
-                Resources
-              </button>
-              <button
-                onClick={() => setActiveSection("paymentStatus")}
-                className={`py-2 px-4 rounded font-gilroy ${
-                  activeSection === "paymentStatus"
-                    ? "text-pc_orange font-gilroy_semibold border-b-2 border-pc_orange"
-                    : "bg-transparent text-pc_blue"
-                }`}
-              >
-                Payment Status
-              </button>
+          <div className="p-4">
+            <div className="text-2xl font-gilroy_semibold mb-4">
+              {moduleData.moduleName}
             </div>
 
-            {/* Content Sections */}
-            <div className="mt-4">
-              {activeSection === "courseModules" && (
-                <div>
-                  <CourseModuleContainer />
-                </div>
-              )}
-              {activeSection === "resources" && (
-                <div>
-                  {/* Resources Content */}
-                  <h3>Resources</h3>
-                  {/* Your Resources Content Here */}
-                </div>
-              )}
-              {activeSection === "paymentStatus" && (
-                <div>
-                  {/* Payment Status Content */}
-                  <h3>Payment Status</h3>
-                  {/* Your Payment Status Content Here */}
-                </div>
-              )}
+            <div>
+              <div>{videos} Videos</div>
+              <div>{pdfs} PDFs</div>
+              <div>{quizzes} Quizzes</div>
             </div>
           </div>
         </div>
@@ -439,4 +400,8 @@ const CourseModule = () => {
   );
 };
 
-export default CourseModule;
+export default ModuleVideoPage;
+
+{
+  /*  */
+}

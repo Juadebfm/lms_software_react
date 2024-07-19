@@ -7,6 +7,7 @@ import ForgotPassword from "./components/ForgotPassword";
 import Profile from "./components/Profile";
 import CourseModulesPage from "./components/CourseModule";
 import HelpCenter from "./components/HelpCenter";
+import ModuleVideoPage from "./components/ModuleVideoPage";
 
 const App = () => {
   return (
@@ -29,6 +30,11 @@ const App = () => {
         <Route
           path="/help_center"
           element={<ProtectedRoutes element={<HelpCenter />} />}
+        />
+
+        <Route
+          path="/module/:moduleId"
+          element={<ProtectedRoutes element={<ModuleVideoPage />} />}
         />
 
         <Route path="/" element={<Login />} />
