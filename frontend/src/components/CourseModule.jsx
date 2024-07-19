@@ -20,6 +20,7 @@ const CourseModule = () => {
   const [isNavScrolled, setIsNavScrolled] = useState(false);
   const [isDetailsVisible, setIsDetailsVisible] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [activeSection, setActiveSection] = useState("courseModules");
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -264,7 +265,7 @@ const CourseModule = () => {
           id="main-content"
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center justify-center gap-2 cursor-pointer">
+            <div className="flex items-center justify-center gap-2 cursor-pointer font-inter">
               <IoIosArrowRoundBack size={20} />
 
               <button onClick={handleGoBack} className="text-[18px]">
@@ -274,7 +275,7 @@ const CourseModule = () => {
             {selectedCourse ? (
               <div>
                 <button
-                  className="mb-4 rounded-lg mt-3 px-6 py-4 w-full bg-pc_orange text-white font-gilroy_semibold font-semibold hover:shadow-md hover:outline hover:outline-slate-200 transition-shadow duration-150 ease-linear flex items-center justify-center gap-2"
+                  className="mb-4 rounded-lg mt-3 w-[312px] h-[56px] bg-pc_orange text-white font-semibold hover:shadow-md hover:outline hover:outline-slate-200 transition-shadow duration-150 ease-linear flex items-center justify-center gap-2 text-[18px] font-inter"
                   onClick={() =>
                     window.open(selectedCourse.course_community_link, "_blank")
                   }
@@ -286,6 +287,70 @@ const CourseModule = () => {
             ) : (
               <p></p>
             )}
+          </div>
+
+          <div className="bg-pc_white_white mt-8 p-10 rounded-t-xl min-h-screen">
+            <div className="text-[32px] font-gilroy_semibold text-pc_blue">
+              {selectedCourse ? <h1>{selectedCourse.course_name}</h1> : <p></p>}
+            </div>
+            {/* Main Toggle Buttons */}
+            <div className="flex items-end justify-start gap-4 mt-8 bg-pc_bg h-[75px] px-8 rounded-xl">
+              <button
+                onClick={() => setActiveSection("courseModules")}
+                className={`py-2 px-4 rounded font-gilroy ${
+                  activeSection === "courseModules"
+                    ? "text-pc_orange font-gilroy_semibold border-b-2 border-pc_orange"
+                    : "bg-transparent text-pc_blue"
+                }`}
+              >
+                Course Modules
+              </button>
+              <button
+                onClick={() => setActiveSection("resources")}
+                className={`py-2 px-4 rounded font-gilroy ${
+                  activeSection === "resources"
+                    ? "text-pc_orange font-gilroy_semibold border-b-2 border-pc_orange"
+                    : "bg-transparent text-pc_blue"
+                }`}
+              >
+                Resources
+              </button>
+              <button
+                onClick={() => setActiveSection("paymentStatus")}
+                className={`py-2 px-4 rounded font-gilroy ${
+                  activeSection === "paymentStatus"
+                    ? "text-pc_orange font-gilroy_semibold border-b-2 border-pc_orange"
+                    : "bg-transparent text-pc_blue"
+                }`}
+              >
+                Payment Status
+              </button>
+            </div>
+
+            {/* Content Sections */}
+            <div className="mt-4">
+              {activeSection === "courseModules" && (
+                <div>
+                  {/* Course Modules Content */}
+                  <h3>Course Modules</h3>
+                  {/* Your Course Modules Content Here */}
+                </div>
+              )}
+              {activeSection === "resources" && (
+                <div>
+                  {/* Resources Content */}
+                  <h3>Resources</h3>
+                  {/* Your Resources Content Here */}
+                </div>
+              )}
+              {activeSection === "paymentStatus" && (
+                <div>
+                  {/* Payment Status Content */}
+                  <h3>Payment Status</h3>
+                  {/* Your Payment Status Content Here */}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
