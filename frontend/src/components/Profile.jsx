@@ -274,7 +274,7 @@ const Profile = () => {
       <div
         className={`bg-gray-800 text-white ${
           isSidebarOpen ? "w-64" : "w-16"
-        } hidden md:flex flex-col items-center transition-all duration-300 bg-white text-pc_black`}
+        } hidden lg:flex flex-col items-center transition-all duration-300 bg-white text-pc_black`}
       >
         <div className="flex justify-between items-center w-full p-2">
           <div className="text-xl font-semibold">
@@ -376,7 +376,7 @@ const Profile = () => {
             isNavScrolled ? "border-b border-pc_light_gray/30" : ""
           }`}
         >
-          <div className="relative hidden md:block">
+          <div className="relative hidden lg:block">
             <IoMdSearch
               size={20}
               className="absolute top-[50%] left-3 -translate-y-[50%] text-[#898989] "
@@ -389,7 +389,7 @@ const Profile = () => {
             />
           </div>
           {/* Mobile Navbar */}
-          <div className="md:hidden flex items-center justify-between w-full py-4">
+          <div className="lg:hidden flex items-center justify-between w-full py-4">
             <div
               className="flex items-center justify-center text-white rounded-full cursor-pointer"
               onClick={toggleMobileSidebar}
@@ -729,7 +729,7 @@ const Profile = () => {
       <div
         className={`${
           isMobileSidebarOpen ? "block" : "hidden"
-        } bg-pc_bg text-pc_black w-[80%] fixed top-0 left-0 h-full md:hidden transition-all duration-300 py-[31px]`}
+        } bg-pc_bg text-pc_black w-[80%] md:w-[50%] fixed top-0 left-0 h-full lg:hidden transition-all duration-300 py-[31px]`}
       >
         <div className="flex justify-between items-center px-6">
           <div className="flex items-center justify-center gap-3 ">
