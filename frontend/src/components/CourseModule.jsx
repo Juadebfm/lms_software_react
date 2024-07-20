@@ -307,7 +307,7 @@ const CourseModule = () => {
                   onClick={() => setActiveSection("courseModules")}
                   className={`py-2 px-4 rounded font-gilroy ${
                     activeSection === "courseModules"
-                      ? "text-pc_white_white lg:text-pc_orange  font-gilroy_semibold border-none bg-pc_blue lg:bg-transparent w-[250px] lg:border-b-2 border-pc_orange"
+                      ? "text-pc_white_white lg:text-pc_orange  font-gilroy_semibold border-none bg-pc_blue lg:bg-transparent w-auto lg:border-b-2 border-pc_orange"
                       : "text-pc_black w-max lg:w-auto bg-pc_bg lg:bg-transparent lg:text-pc_blue"
                   }`}
                 >
@@ -317,7 +317,7 @@ const CourseModule = () => {
                   onClick={() => setActiveSection("resources")}
                   className={`py-2 px-4 rounded font-gilroy ${
                     activeSection === "resources"
-                      ? "text-pc_white_white lg:text-pc_orange  font-gilroy_semibold border-none bg-pc_blue lg:bg-transparent w-[250px] lg:border-b-2 border-pc_orange"
+                      ? "text-pc_white_white lg:text-pc_orange  font-gilroy_semibold border-none bg-pc_blue lg:bg-transparent w-auto lg:border-b-2 border-pc_orange"
                       : "text-pc_black w-max lg:w-auto bg-pc_bg lg:bg-transparent lg:text-pc_blue"
                   }`}
                 >
@@ -327,7 +327,7 @@ const CourseModule = () => {
                   onClick={() => setActiveSection("paymentStatus")}
                   className={`py-2 px-4 rounded font-gilroy ${
                     activeSection === "paymentStatus"
-                      ? "text-pc_white_white lg:text-pc_orange  font-gilroy_semibold border-none bg-pc_blue lg:bg-transparent w-[250px] lg:border-b-2 border-pc_orange"
+                      ? "text-pc_white_white lg:text-pc_orange  font-gilroy_semibold border-none bg-pc_blue lg:bg-transparent w-auto lg:border-b-2 border-pc_orange"
                       : "text-pc_black w-max lg:w-auto bg-pc_bg lg:bg-transparent lg:text-pc_blue"
                   }`}
                 >
