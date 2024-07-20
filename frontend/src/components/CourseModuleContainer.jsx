@@ -135,7 +135,7 @@ const CourseModuleContainer = () => {
                   </div>
                 </div>
               </div>
-              <div className="border-t lg:border-l pt-2 lg:pt-0 border-pc_light_gray h-full w-full lg:w-[30%]">
+              <div className="border-t border-l-0 lg:border-t-0 lg:border-l pt-2 lg:pt-0 border-pc_light_gray h-full w-full lg:w-[30%]">
                 <button className="mt-2 p-2 border rounded w-[210px] mx-auto text-white font-gilroy_semibold text-[12px] bg-pc_blue flex flex-col items-center justify-between">
                   {isVisited ? "Continue Module" : "View Module"}
                 </button>
