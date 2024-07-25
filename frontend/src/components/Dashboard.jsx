@@ -506,7 +506,9 @@ const Dashboard = () => {
                 <PiBookOpenTextFill size={28} className="text-pc_orange" />
               </div>
               <div>
-                <h1 className="font-gilroy text-sm md:text-base">My Courses</h1>
+                <h1 className="text-[21px] lg:text-[24px] font-gilroy_semibold leading-none">
+                  My Courses
+                </h1>
                 <div className="flex items-center mt-1 lg:mt-2 justify-center font-gilroy">
                   <span className="font-semibold mr-1">{numberOfCourses}</span>
                   Registered course{numberOfCourses !== 1 && "s"}
@@ -521,8 +523,8 @@ const Dashboard = () => {
               onClick={() => setActiveTab("courses")}
               className={`${
                 activeTab === "courses"
-                  ? " text-pc_white_white md:text-pc_orange border-none md:border-b-2 border-transparent md:border-pc_orange bg-pc_blue md:bg-transparent px-8 md:px-0 py-3 md:py-0 rounded-md font-gilroy_semibold"
-                  : "text-pc_black bg-pc_bg px-8 md:px-0 py-3 md:py-0 rounded-md font-gilroy"
+                  ? "bg-pc_blue lg:bg-transparent lg:border-b-2 border-pc_orange px-6 py-3 lg:pb-0 font-gilroy_semibold text-pc_white lg:text-pc_orange"
+                  : "text-pc_black bg-pc_bg lg:bg-transparent px-6 py-3 lg:pb-0"
               }`}
             >
               <span>My Courses</span>
@@ -531,8 +533,8 @@ const Dashboard = () => {
               onClick={() => setActiveTab("certificates")}
               className={`${
                 activeTab === "certificates"
-                  ? " text-pc_white_white md:text-pc_orange border-none md:border-b-2 border-transparent md:border-pc_orange bg-pc_blue md:bg-transparent px-8 md:px-0 py-3 md:py-0 rounded-md font-gilroy_semibold"
-                  : "text-pc_black bg-pc_bg px-8 md:px-0 py-3 md:py-0 rounded-md"
+                  ? "bg-pc_blue lg:bg-transparent lg:border-b-2 border-pc_orange px-6 py-3 lg:pb-0 font-gilroy_semibold text-pc_white lg:text-pc_orange"
+                  : "text-pc_black bg-pc_bg lg:bg-transparent px-6 py-3 lg:pb-0"
               }`}
             >
               Certificates
