@@ -83,3 +83,18 @@
   color: #ffffff; /* White text */
   font-size: 18px;
 }
+
+/* ReactPlayerComponent.css */
+.react-player-wrapper {
+  position: relative;
+  padding-top: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+}
+
+.react-player-wrapper .react-player {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}

@@ -2,17 +2,23 @@ import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import ModuleImage from "../assets/moduleimage.png";
 import Pluralcode from "../assets/PluralCode.png";
-import { MdDashboard } from "react-icons/md";
+import { MdDashboard, MdOutlineQuiz } from "react-icons/md";
 import { HiUser } from "react-icons/hi2";
 import { TfiHelpAlt } from "react-icons/tfi";
 import { TbLogout } from "react-icons/tb";
 import { IoIosArrowRoundBack, IoMdSearch } from "react-icons/io";
 import Plc from "../assets/plc.png";
-import { FaBars, FaTimes } from "react-icons/fa";
+import { FaBars, FaReadme, FaTimes } from "react-icons/fa";
 import { AuthContext } from "../context/AuthContext";
 import { DashboardDataContext } from "../context/DashboardDataContext";
-import { IoChevronDownSharp, IoChevronUpSharp } from "react-icons/io5";
+import {
+  IoChevronBack,
+  IoChevronDownSharp,
+  IoChevronForward,
+  IoChevronUpSharp,
+} from "react-icons/io5";
 import { CgMenuRight } from "react-icons/cg";
+import { FaRegCirclePlay } from "react-icons/fa6";
 
 const ModuleVideoPage = () => {
   const { moduleId } = useParams();
@@ -22,11 +28,48 @@ const ModuleVideoPage = () => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isDetailsVisible, setIsDetailsVisible] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
-
+  const [currentVideoUrl, setCurrentVideoUrl] = useState(null);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const { userData } = useContext(AuthContext);
   const { dashboardData } = useContext(DashboardDataContext);
 
   const { enrolledcourses, message, token, totalbalance, user } = userData;
+
+  useEffect(() => {
+    const fetchModuleData = () => {
+      const storedData = JSON.parse(
+        localStorage.getItem("groupedStudyMaterials")
+      );
+      if (storedData) {
+        const module = storedData.courseModules.find(
+          (mod) => mod.moduleId === parseInt(moduleId)
+        );
+        setModuleData(module || null);
+
+        if (module) {
+          // Find the first video URL
+          const firstVideo = module.studyMaterials?.finalResult
+            .flatMap((item) => item.lecture.attachments)
+            .find((attachment) => attachment.kind === "video");
+
+          if (firstVideo) {
+            setCurrentVideoUrl(firstVideo.url);
+          }
+        }
+      }
+    };
+
+    fetchModuleData();
+  }, [moduleId]);
+
+  useEffect(() => {
+    if (currentVideoUrl) {
+      const videoElement = document.querySelector("video");
+      if (videoElement) {
+        videoElement.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  }, [currentVideoUrl]);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleMobileSidebar = () =>
@@ -48,18 +91,6 @@ const ModuleVideoPage = () => {
       .join("");
 
   const toggleDetailsVisibility = () => setIsDetailsVisible((prev) => !prev);
-
-  useEffect(() => {
-    const storedData = JSON.parse(
-      localStorage.getItem("groupedStudyMaterials")
-    );
-    if (storedData) {
-      const module = storedData.courseModules.find(
-        (mod) => mod.moduleId === parseInt(moduleId)
-      );
-      setModuleData(module || null);
-    }
-  }, [moduleId]);
 
   if (!moduleData) {
     return <div>Loading...</div>;
@@ -101,6 +132,48 @@ const ModuleVideoPage = () => {
 
   const { studyMaterials } = moduleData;
   const { videos, pdfs, quizzes } = countStudyMaterials(studyMaterials);
+
+  const handleLectureClick = (attachment) => {
+    switch (attachment.kind) {
+      case "video":
+        setCurrentVideoUrl(attachment.url);
+        setCurrentVideoIndex(index);
+        break;
+      case "pdf_embed":
+        console.log("Display PDF:", attachment.url);
+        break;
+      case "quiz":
+        navigate(`/quiz/${attachment.id}`);
+        break;
+      default:
+        console.log("Unknown attachment type");
+    }
+  };
+
+  const getAllVideos = () => {
+    return studyMaterials.finalResult.flatMap((item) =>
+      item.lecture.attachments.filter(
+        (attachment) => attachment.kind === "video"
+      )
+    );
+  };
+
+  const allVideos = getAllVideos();
+
+  const goToPreviousVideo = () => {
+    if (currentVideoIndex > 0) {
+      setCurrentVideoIndex((prevIndex) => prevIndex - 1);
+      setCurrentVideoUrl(allVideos[currentVideoIndex - 1].url);
+    }
+  };
+
+  const goToNextVideo = () => {
+    if (currentVideoIndex < allVideos.length - 1) {
+      setCurrentVideoIndex((prevIndex) => prevIndex + 1);
+      setCurrentVideoUrl(allVideos[currentVideoIndex + 1].url);
+    }
+  };
+
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
@@ -307,15 +380,105 @@ const ModuleVideoPage = () => {
               <p></p>
             )}
           </div>
-          <div className="p-4">
-            <div className="text-2xl font-gilroy_semibold mb-4">
-              {moduleData.moduleName}
+
+          <div className="p-0 lg:p-4 flex flex-col lg:flex-row items-start justify-between gap-10">
+            <div className=" w-full lg:w-[70%]">
+              <div className=" mb-4 capitalize flex items-center justify-between">
+                <div className="text-2xl font-gilroy_semibold">
+                  {moduleData.moduleName}
+                </div>
+
+                <div className="flex justify-between mt-4">
+                  <button
+                    onClick={goToPreviousVideo}
+                    disabled={currentVideoIndex === 0}
+                    className={`px-4 py-2 bg-transparent text-pc_blue font-gilroy_semibold flex items-center justify-center gap-1 ${
+                      currentVideoIndex === 0
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
+                  >
+                    <IoChevronBack />
+                    Previous
+                  </button>
+                  <button
+                    onClick={goToNextVideo}
+                    disabled={currentVideoIndex === allVideos.length - 1}
+                    className={`px-4 py-2 bg-transparent text-pc_blue font-gilroy_semibold flex items-center justify-center gap-1 ${
+                      currentVideoIndex === allVideos.length - 1
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
+                  >
+                    Next
+                    <IoChevronForward />
+                  </button>
+                </div>
+              </div>
+
+              <div className="">
+                {currentVideoUrl && (
+                  <div className="w-full">
+                    <video
+                      src={currentVideoUrl}
+                      controls
+                      className="max-w-full mx-auto"
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div>
-              <div>{videos} Videos</div>
-              <div>{pdfs} PDFs</div>
-              <div>{quizzes} Quizzes</div>
+            <div className="flex flex-col gap-4 w-full lg:max-w-[30%] overflow-y-auto">
+              <div className="">
+                <div className="text-base font-gilroy_semibold capitalize">
+                  {moduleData.moduleName}
+                </div>
+                {studyMaterials && studyMaterials.finalResult.length > 0 ? (
+                  studyMaterials.finalResult.map((item, index) => (
+                    <div
+                      key={index}
+                      className="p-4 bg-white shadow-md rounded-md"
+                    >
+                      <h2 className="text-2xl font-semibold mb-4 capitalize">
+                        {item.lecture.lectureName}
+                      </h2>
+                      <ul className="space-y-2">
+                        {item.lecture.attachments.map((attachment, index) => (
+                          <li
+                            key={index}
+                            className="cursor-pointer text-blue-600 underline"
+                            onClick={() => handleLectureClick(attachment)}
+                          >
+                            {attachment.kind === "video" && (
+                              <span>
+                                <FaRegCirclePlay />
+                                {attachment.name || "Untitled Video"}
+                              </span>
+                            )}
+                            {attachment.kind === "pdf_embed" && (
+                              <span>
+                                <FaReadme />
+                                {attachment.name || "Untitled PDF"}
+                              </span>
+                            )}
+                            {attachment.kind === "quiz" && (
+                              <span>
+                                <MdOutlineQuiz />
+                                {attachment.name || "Untitled Quiz"}
+                              </span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))
+                ) : (
+                  <p>No study materials available.</p>
+                )}
+              </div>
             </div>
           </div>
         </div>
