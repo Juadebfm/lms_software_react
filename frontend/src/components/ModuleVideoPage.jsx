@@ -20,6 +20,8 @@ import {
 import { CgMenuRight } from "react-icons/cg";
 import { FaRegCirclePlay } from "react-icons/fa6";
 
+import Reading from "../assets/reading.png";
+
 const ModuleVideoPage = () => {
   const { moduleId } = useParams();
   const [moduleData, setModuleData] = useState(null);
@@ -172,6 +174,31 @@ const ModuleVideoPage = () => {
       setCurrentVideoIndex((prevIndex) => prevIndex + 1);
       setCurrentVideoUrl(allVideos[currentVideoIndex + 1].url);
     }
+  };
+
+  const formatAttachmentName = (attachment) => {
+    if (attachment.kind === "video" || attachment.kind === "pdf_embed") {
+      let name = attachment.name;
+      // Remove numbering at the start and file extension
+      name = name.replace(/^\d+\.\s*/, "").replace(/\.[^/.]+$/, "");
+      // Replace underscores with spaces
+      name = name.replace(/_/g, " ");
+      // Add prefix based on type
+      const prefix =
+        attachment.kind === "video" ? (
+          <span className="text-pc_blue font-gilroy_semibold">Video:</span>
+        ) : (
+          <span className="text-pc_blue font-gilroy_semibold">Reading:</span>
+        );
+      return (
+        <>
+          {prefix} {name}
+        </>
+      );
+    } else if (attachment.kind === "quiz") {
+      return "Practice Quiz: Test What You Have Just Learned";
+    }
+    return attachment.name || "Untitled";
   };
 
   return (
@@ -422,7 +449,7 @@ const ModuleVideoPage = () => {
                     <video
                       src={currentVideoUrl}
                       controls
-                      className="max-w-full mx-auto"
+                      className="max-w-full mx-auto h-[543px]"
                     >
                       Your browser does not support the video tag.
                     </video>
@@ -431,43 +458,58 @@ const ModuleVideoPage = () => {
               </div>
             </div>
 
-            <div className="flex flex-col gap-4 w-full lg:max-w-[30%] overflow-y-auto">
-              <div className="">
-                <div className="text-base font-gilroy_semibold capitalize">
+            <div className="flex flex-col gap-4 w-full lg:max-w-[30%] scrollbar scrollbar-thumb-pc_blue scrollbar-track-pc_blue/40 h-screen overflow-y-scroll">
+              <div className="px-4">
+                <div className="text-xl font-gilroy_semibold capitalize">
                   {moduleData.moduleName}
                 </div>
                 {studyMaterials && studyMaterials.finalResult.length > 0 ? (
                   studyMaterials.finalResult.map((item, index) => (
                     <div
                       key={index}
-                      className="p-4 bg-white shadow-md rounded-md"
+                      className="shadow-md shadow-pc_light_gray p-4 mt-5"
                     >
                       <h2 className="text-2xl font-semibold mb-4 capitalize">
                         {item.lecture.lectureName}
                       </h2>
-                      <ul className="space-y-2">
+                      <ul className="">
                         {item.lecture.attachments.map((attachment, index) => (
                           <li
                             key={index}
-                            className="cursor-pointer text-blue-600 underline"
+                            className="cursor-pointer"
                             onClick={() => handleLectureClick(attachment)}
                           >
                             {attachment.kind === "video" && (
-                              <span>
-                                <FaRegCirclePlay />
-                                {attachment.name || "Untitled Video"}
+                              <span className="flex items-start justify-start gap-2">
+                                <div className="w-[15%] flex items-center justify-center">
+                                  <FaRegCirclePlay className="text-[25px] " />
+                                </div>
+                                <div className="w-[85%]">
+                                  {formatAttachmentName(attachment)}
+                                </div>
                               </span>
                             )}
                             {attachment.kind === "pdf_embed" && (
-                              <span>
-                                <FaReadme />
-                                {attachment.name || "Untitled PDF"}
+                              <span className="flex items-start gap-2 justify-start">
+                                <div className="w-[15%] flex items-center justify-center">
+                                  <img
+                                    src={Reading}
+                                    className="w-[32px] h-[32px]"
+                                  />
+                                </div>
+                                <div className="w-[85%]">
+                                  {formatAttachmentName(attachment)}
+                                </div>
                               </span>
                             )}
                             {attachment.kind === "quiz" && (
-                              <span>
-                                <MdOutlineQuiz />
-                                {attachment.name || "Untitled Quiz"}
+                              <span className="flex items-start justify-start gap-2">
+                                <div className="w-[15%] flex items-center justify-center">
+                                  <MdOutlineQuiz className="text-[25px] " />
+                                </div>
+                                <div className="w-[85%]">
+                                  {formatAttachmentName(attachment)}
+                                </div>
                               </span>
                             )}
                           </li>
