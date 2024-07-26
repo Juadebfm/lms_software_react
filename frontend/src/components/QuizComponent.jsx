@@ -478,14 +478,16 @@ const QuizComponent = () => {
                     </span>
                   </p>
                   {userScore >= 80 ? (
-                    <button
-                      onClick={() => {
-                        /* Handle next module navigation */
-                      }}
-                      className="mt-4 w-[200px] h-[51px] px-4 py-2 text-white font-semibold rounded bg-pc_blue hover:bg-pc_blue/90 transition-all duration-150 ease-linear"
-                    >
-                      Next Module
-                    </button>
+                    <div className="flex items-center justify-center">
+                      <button
+                        onClick={() => {
+                          /* Handle next module navigation */
+                        }}
+                        className="mt-4 w-[200px] h-[51px] px-4 py-2 text-base text-white font-gilroy_semibold rounded bg-pc_orange hover:bg-pc_orange/90 transition-all duration-150 ease-linear"
+                      >
+                        Next Module
+                      </button>
+                    </div>
                   ) : (
                     <div className="flex items-center justify-center">
                       <button
