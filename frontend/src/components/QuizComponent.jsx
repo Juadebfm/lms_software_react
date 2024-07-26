@@ -414,7 +414,7 @@ const QuizComponent = () => {
                 <p>No quiz data available</p>
               )}
 
-              <div className="p-6">
+              <div className="p-6 lg:p-0">
                 <button
                   onClick={handleSubmit}
                   disabled={
@@ -435,7 +435,7 @@ const QuizComponent = () => {
           ) : (
             <div className="my-3">
               <div className="flex items-end justify-between">
-                <div className="text-xl font-bold flex flex-col lg:flex-row items-center justify-start gap-3 bg-pc_white_white lg:bg-transparent w-full lg:w-auto p-10 lg:p-0 border-b lg:border-b-0 border-b-slate-400 rounded-lg">
+                <div className="text-xl font-bold flex flex-col lg:flex-row items-center justify-start lg:justify-between gap-3 bg-pc_white_white lg:bg-transparent w-full p-10 lg:p-0 border-b lg:border-b-0 border-b-slate-400 rounded-lg">
                   <span className="flex items-center justify-center gap-2">
                     <span className="text-green-500">
                       <IoCheckmarkCircleSharp />
@@ -446,7 +446,7 @@ const QuizComponent = () => {
                   {!showResults && (
                     <button
                       onClick={() => setShowResults(true)}
-                      className="mt-4 w-[200px] h-[51px] px-4 py-2 text-base text-white font-gilroy_semibold rounded bg-pc_orange hover:bg-pc_orange/90 transition-all duration-150 ease-linear"
+                      className="mt-4 lg:mt-0 w-[200px] h-[51px] px-4 py-2 text-base text-white font-gilroy_semibold rounded bg-pc_orange hover:bg-pc_orange/90 transition-all duration-150 ease-linear"
                     >
                       Show Result
                     </button>
