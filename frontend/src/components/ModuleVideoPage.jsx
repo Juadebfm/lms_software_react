@@ -545,7 +545,7 @@ const ModuleVideoPage = () => {
           className="flex-1 p-0 bg-pc_bg font-gilroy overflow-y-auto"
           id="main-content"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between p-4 lg:p-0">
             <div className="flex items-center justify-center gap-2 cursor-pointer font-inter">
               <IoIosArrowRoundBack size={20} />
 
@@ -571,13 +571,13 @@ const ModuleVideoPage = () => {
           </div>
 
           <div className="p-0 lg:p-4 flex flex-col lg:flex-row items-start justify-between gap-10">
-            <div className=" w-full lg:w-[70%]">
+            <div className="w-full lg:w-[70%] p-4 lg:p-0">
               <div className=" mb-4 capitalize flex items-center justify-between">
                 <div className="text-2xl font-gilroy_semibold">
                   {moduleData.moduleName}
                 </div>
 
-                <div className="flex justify-between mt-4">
+                <div className="flex justify-between mt-0 lg:mt-4">
                   <button
                     onClick={goToPreviousAttachment}
                     disabled={currentVideoIndex === 0}
@@ -611,7 +611,7 @@ const ModuleVideoPage = () => {
                     ref={videoRef}
                     src={currentVideoUrl}
                     controls
-                    className="max-w-full mx-auto h-[543px]"
+                    className="max-w-full mx-auto h-[250px] lg:h-[543px]"
                     onPlay={handleVideoPlay}
                   >
                     Your browser does not support the video tag.
