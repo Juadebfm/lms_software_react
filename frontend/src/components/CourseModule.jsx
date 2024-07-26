@@ -311,7 +311,7 @@ const CourseModule = () => {
           </div>
 
           <div className="bg-pc_white_white mt-8 p-4 md:p-10 rounded-t-xl h-max md:min-h-screen w-full">
-            <div className="text-[32px] font-gilroy_semibold text-pc_blue">
+            <div className="text-[28px] lg:text-[32px] leading-tight text-center lg:text-start font-gilroy_semibold text-pc_blue p-6 lg:p-0">
               {selectedCourse ? <h1>{selectedCourse.course_name}</h1> : <p></p>}
             </div>
             {/* Main Toggle Buttons */}

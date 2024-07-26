@@ -425,7 +425,7 @@ const QuizComponent = () => {
                     Object.keys(userSelections).length ===
                     quizData?.quiz.questions.length
                       ? "w-full lg:w-[200px] h-[51px] bg-pc_orange"
-                      : "bg-gray-500"
+                      : "bg-gray-500 w-full lg:w-[200px] h-[51px]"
                   }`}
                 >
                   Submit

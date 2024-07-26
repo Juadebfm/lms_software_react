@@ -124,7 +124,7 @@ const CourseModuleContainer = () => {
                 <img src={ModuleImageLg} alt="" className="block lg:hidden" />
                 <div className="font-gilroy_semibold space-y-1">
                   <div className="font-gilroy_thin">Course | {courseName}</div>
-                  <div className="font-gilroy_semibold text-[24px] leading-tight">
+                  <div className="font-gilroy_semibold text-[24px] leading-tight capitalize">
                     {module.moduleName}
                   </div>
                   <div className="font-gilroy_thin flex items-center justify-start text-[10.3px] gap-2">
