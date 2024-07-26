@@ -77,6 +77,8 @@ const Dashboard = () => {
 
   const { enrolledcourses, message, token, totalbalance, user } = userData;
 
+  const [certificates, setCertificates] = useState([]);
+
   const {
     academy_level,
     age,
@@ -290,6 +292,26 @@ const Dashboard = () => {
       setLoading(false); // Hide loading modal on error
     }
   };
+
+  const studentId = student_id_number;
+
+  const fetchCertificates = async () => {
+    try {
+      const response = await fetch(
+        `https://pluralcode.net/apis/v1/list_certificates.php?student_id=${studentId}`
+      );
+      const data = await response.json();
+      setCertificates(data);
+    } catch (error) {
+      console.error("Error fetching certificates:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "certificates") {
+      fetchCertificates();
+    }
+  }, [activeTab]);
 
   return (
     <div className="flex h-screen overflow-x-hidden">
@@ -523,7 +545,7 @@ const Dashboard = () => {
               onClick={() => setActiveTab("courses")}
               className={`${
                 activeTab === "courses"
-                  ? "bg-pc_blue lg:bg-transparent lg:border-b-2 border-pc_orange px-6 py-3 lg:pb-0 font-gilroy_semibold text-pc_white lg:text-pc_orange"
+                  ? "bg-pc_blue lg:bg-transparent lg:border-b-2 border-pc_orange px-6 py-3 lg:pb-0 font-gilroy_semibold text-pc_white_white lg:text-pc_orange"
                   : "text-pc_black bg-pc_bg lg:bg-transparent px-6 py-3 lg:pb-0"
               }`}
             >
@@ -533,7 +555,7 @@ const Dashboard = () => {
               onClick={() => setActiveTab("certificates")}
               className={`${
                 activeTab === "certificates"
-                  ? "bg-pc_blue lg:bg-transparent lg:border-b-2 border-pc_orange px-6 py-3 lg:pb-0 font-gilroy_semibold text-pc_white lg:text-pc_orange"
+                  ? "bg-pc_blue lg:bg-transparent lg:border-b-2 border-pc_orange px-6 py-3 lg:pb-0 font-gilroy_semibold text-pc_white_white lg:text-pc_orange"
                   : "text-pc_black bg-pc_bg lg:bg-transparent px-6 py-3 lg:pb-0"
               }`}
             >
@@ -604,41 +626,55 @@ const Dashboard = () => {
                 </div>
               )}
               {activeTab === "certificates" && (
-                <div>
-                  <div>Div for certificates</div>
+                <div className="font-gilroy_semibold text-lg">
+                  {certificates.length > 0 ? (
+                    certificates.map((certificate, index) => (
+                      <div key={index} className="certificate-item">
+                        {/* Display certificate details here */}
+                        <p>{certificate.name}</p>
+                        <p>{certificate.date}</p>
+                        {/* Add more fields as needed */}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-center lg:text-start">
+                      No certificates found.
+                    </p>
+                  )}
                 </div>
               )}
             </div>
-
-            <div
-              id="faq"
-              className="FAQ shadow-lg bg-white mt-16 py-7 px-[20px] lg:px-14 rounded-lg w-full lg:w-[80%] mx-auto cursor-pointer relative"
-              onClick={toggleFAQVisibility}
-            >
-              <div className="flex items-center justify-between w-full cursor-pointer">
-                <div className="w-[24px] h-[24px] bg-pc_blue rounded-full hidden lg:block"></div>
-                <h3 className="font-gilroy_thin text-sm md:text-base text-black">
-                  Difference between instructor-led vs self-paced courses
-                </h3>
-                {isFAQVisible ? (
-                  <HiChevronDown className="text-[24px]" />
-                ) : (
-                  <HiChevronRight className="text-[24px]" />
+            {activeTab === "courses" && (
+              <div
+                id="faq"
+                className="FAQ shadow-lg bg-white mt-16 py-7 px-[20px] lg:px-14 rounded-lg w-full lg:w-[80%] mx-auto cursor-pointer relative"
+                onClick={toggleFAQVisibility}
+              >
+                <div className="flex items-center justify-between w-full cursor-pointer">
+                  <div className="w-[24px] h-[24px] bg-pc_blue rounded-full hidden lg:block"></div>
+                  <h3 className="font-gilroy_thin text-sm md:text-base text-black">
+                    Difference between instructor-led vs self-paced courses
+                  </h3>
+                  {isFAQVisible ? (
+                    <HiChevronDown className="text-[24px]" />
+                  ) : (
+                    <HiChevronRight className="text-[24px]" />
+                  )}
+                </div>
+                {isFAQVisible && (
+                  <p className="font-gilroy_thin mt-10 border-t pt-8 border-pc_bg para">
+                    You can access the recorded materials for both your
+                    self-paced and instructor-led courses right here. <br />
+                    <br />
+                    However, while Self-Paced (LooP) courses allow you to
+                    progress through the modules at your own time and pace,
+                    instructor-led programs are designed so that the modules are
+                    unlocked often weekly in accordance with the progress of the
+                    class in general.
+                  </p>
                 )}
               </div>
-              {isFAQVisible && (
-                <p className="font-gilroy_thin mt-10 border-t pt-8 border-pc_bg para">
-                  You can access the recorded materials for both your self-paced
-                  and instructor-led courses right here. <br />
-                  <br />
-                  However, while Self-Paced (LooP) courses allow you to progress
-                  through the modules at your own time and pace, instructor-led
-                  programs are designed so that the modules are unlocked often
-                  weekly in accordance with the progress of the class in
-                  general.
-                </p>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>
