@@ -15,6 +15,7 @@ import { FaBars, FaTimes } from "react-icons/fa";
 import { RiSlackLine } from "react-icons/ri";
 import CourseModuleContainer from "./CourseModuleContainer";
 import { CgMenuRight } from "react-icons/cg";
+import { IoCheckmarkCircleSharp } from "react-icons/io5";
 
 const QuizComponent = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -26,7 +27,18 @@ const QuizComponent = () => {
 
   const [quizData, setQuizData] = useState(null); // New state for quiz data
 
-  const [userSelections, setUserSelections] = useState({});
+  const quizSelectionKey =
+    quizData && quizData.quiz ? `quizSelections_${quizData.quiz.id}` : null;
+  const [userSelections, setUserSelections] = useState(() => {
+    const savedSelections = localStorage.getItem(quizSelectionKey);
+    return savedSelections ? JSON.parse(savedSelections) : {};
+  });
+  const [allQuestionsAnswered, setAllQuestionsAnswered] = useState(false); // Track if all questions are answered
+
+  const [showQuestions, setShowQuestions] = useState(true);
+  const [userScore, setUserScore] = useState(null);
+  const [showResults, setShowResults] = useState(false);
+  const [isRetry, setIsRetry] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -86,30 +98,61 @@ const QuizComponent = () => {
   }, [location.state, dashboardData]);
 
   useEffect(() => {
-    const courseFromLocalStorage = JSON.parse(
-      localStorage.getItem("clickedCourse")
-    );
-    if (courseFromLocalStorage) {
-      setSelectedCourse(courseFromLocalStorage);
-    }
-
     const quizFromLocalStorage = JSON.parse(
       localStorage.getItem("currentQuizData")
     );
-    console.log("Quiz data from local storage:", quizFromLocalStorage); // Debug log
-    if (quizFromLocalStorage) {
+    if (quizFromLocalStorage && quizFromLocalStorage.quiz) {
       setQuizData(quizFromLocalStorage);
+
+      // Load saved selections
+      const savedSelections = localStorage.getItem(
+        `quizSelections_${quizFromLocalStorage.quiz.id}`
+      );
+      if (savedSelections) {
+        setUserSelections(JSON.parse(savedSelections));
+      }
     } else {
-      console.error("No quiz data found in local storage");
+      console.error("No valid quiz data found in local storage");
     }
   }, []);
 
-  const handleAnswerChange = (e, correctAnswers) => {
-    const selectedAnswer = e.target.value;
-    const isCorrect = correctAnswers.includes(selectedAnswer);
-    console.log(
-      `Answer: ${selectedAnswer} is ${isCorrect ? "correct" : "incorrect"}`
+  useEffect(() => {
+    if (quizData && quizData.quiz) {
+      localStorage.setItem(
+        `quizSelections_${quizData.quiz.id}`,
+        JSON.stringify(userSelections)
+      );
+    }
+  }, [userSelections, quizData]);
+
+  const handleAnswerChange = (e, questionIndex) => {
+    setUserSelections((prev) => ({
+      ...prev,
+      [questionIndex]: e.target.value,
+    }));
+  };
+
+  const handleSubmit = () => {
+    let score = 0;
+    quizData.quiz.questions.forEach((question, index) => {
+      if (userSelections[index] === question.correct_answers[0]) {
+        score++;
+      }
+    });
+    const percentage = (score / quizData.quiz.questions.length) * 100;
+    setUserScore(percentage);
+    setShowQuestions(false);
+    localStorage.setItem(
+      `quizScore_${quizData.quiz.id}`,
+      percentage.toString()
     );
+  };
+
+  const handleTryAgain = () => {
+    setIsRetry(true);
+    setShowQuestions(true);
+    setUserScore(null);
+    localStorage.removeItem(`quizScore_${quizData.quiz.id}`);
   };
 
   const getLinkClasses = (path) => {
@@ -331,42 +374,137 @@ const QuizComponent = () => {
             )}
           </div>
 
-          <h1 className="font-gilroy_semibold text-pc_blue text-[32px]">
+          <h1 className="bg-pc_white_white lg:bg-transparent text-center lg:text-start py-4 lg:py-0 font-gilroy_semibold text-pc_blue text-[32px] mt-4 lg:mt-10">
             Assessments
           </h1>
 
-          {quizData && quizData.quiz && quizData.quiz.questions ? (
-            quizData.quiz.questions.map((question, index) => (
-              <div key={index} className="my-6">
-                <div>
-                  <h3 className="text-xl font-medium">{`${index + 1}. ${
-                    question.question
-                  }`}</h3>
-                  {question.answers.map((answer, answerIndex) => (
-                    <div key={answerIndex} className="flex items-center mb-2">
-                      <input
-                        type="radio"
-                        id={`q${index}a${answerIndex}`}
-                        name={`question${index}`}
-                        value={answer}
-                        onChange={(e) =>
-                          handleAnswerChange(e, question.correct_answers)
-                        }
-                        className="mr-2"
-                      />
-                      <label
-                        htmlFor={`q${index}a${answerIndex}`}
-                        className="cursor-pointer"
+          {showQuestions ? (
+            <>
+              {quizData && quizData.quiz && quizData.quiz.questions ? (
+                quizData.quiz.questions.map((question, index) => (
+                  <div key={index} className="my-2 lg:my-6 p-6 lg:p-0">
+                    <h3 className="text-xl font-medium mb-2">{`${index + 1}. ${
+                      question.question
+                    }`}</h3>
+                    {question.answers.map((answer, answerIndex) => (
+                      <div
+                        key={answerIndex}
+                        className="flex items-center mb-0 lg:mb-2"
                       >
-                        {answer}
-                      </label>
-                    </div>
-                  ))}
+                        <input
+                          type="radio"
+                          id={`q${index}a${answerIndex}`}
+                          name={`question${index}`}
+                          value={answer}
+                          onChange={(e) => handleAnswerChange(e, index)}
+                          checked={userSelections[index] === answer}
+                          className="mr-2"
+                        />
+                        <label
+                          htmlFor={`q${index}a${answerIndex}`}
+                          className={`cursor-pointer ${
+                            isRetry && userSelections[index] === answer
+                              ? answer === question.correct_answers[0]
+                                ? "text-green-500"
+                                : "text-red-500"
+                              : ""
+                          }`}
+                        >
+                          {answer}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                ))
+              ) : (
+                <p>No quiz data available</p>
+              )}
+
+              <div className="p-6">
+                <button
+                  onClick={handleSubmit}
+                  disabled={
+                    Object.keys(userSelections).length !==
+                    quizData?.quiz.questions.length
+                  }
+                  className={`mt-4 px-8 lg:px-4 py-2 text-white font-semibold rounded ${
+                    Object.keys(userSelections).length ===
+                    quizData?.quiz.questions.length
+                      ? "w-full lg:w-[200px] h-[51px] bg-pc_orange"
+                      : "bg-gray-500"
+                  }`}
+                >
+                  Submit
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="my-3">
+              <div className="flex items-end justify-between">
+                <div className="text-xl font-bold flex flex-col lg:flex-row items-center justify-start gap-3 bg-pc_white_white lg:bg-transparent w-full lg:w-auto p-10 lg:p-0 border-b lg:border-b-0 border-b-slate-400 rounded-lg">
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="text-green-500">
+                      <IoCheckmarkCircleSharp />
+                    </span>
+                    <span>Your Quiz Has Been Submitted</span>
+                  </span>
+
+                  {!showResults && (
+                    <button
+                      onClick={() => setShowResults(true)}
+                      className="mt-4 w-[200px] h-[51px] px-4 py-2 text-base text-white font-gilroy_semibold rounded bg-pc_orange hover:bg-pc_orange/90 transition-all duration-150 ease-linear"
+                    >
+                      Show Result
+                    </button>
+                  )}
                 </div>
               </div>
-            ))
-          ) : (
-            <p>No quiz data available</p>
+
+              {showResults && (
+                <div className="mt-4 p-6 bg-white rounded-lg shadow">
+                  <span className="text-xl flex flex-col items-center justify-center border-b border-slate-400 pb-10">
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-green-500">
+                        <IoCheckmarkCircleSharp />
+                      </span>
+                      <span>Passing Grade</span>
+                    </div>
+                    <div className="text-base mt-3">
+                      To Pass <i>80% or Higher</i>
+                    </div>
+                  </span>
+                  <p className="text-xl flex items-center justify-center flex-col py-10">
+                    Your Score:
+                    <span
+                      className={
+                        userScore < 80 ? "text-red-500" : "text-green-500"
+                      }
+                    >
+                      {userScore.toFixed(2)}%
+                    </span>
+                  </p>
+                  {userScore >= 80 ? (
+                    <button
+                      onClick={() => {
+                        /* Handle next module navigation */
+                      }}
+                      className="mt-4 w-[200px] h-[51px] px-4 py-2 text-white font-semibold rounded bg-pc_blue hover:bg-pc_blue/90 transition-all duration-150 ease-linear"
+                    >
+                      Next Module
+                    </button>
+                  ) : (
+                    <div className="flex items-center justify-center">
+                      <button
+                        onClick={handleTryAgain}
+                        className="w-[200px] h-[51px] px-4 py-2 text-pc_orange font-semibold rounded bg-transparent mb-4 hover:text-pc_white_white border border-pc_orange hover:bg-pc_orange duration-150 ease-linear transition-all"
+                      >
+                        Try Again
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
