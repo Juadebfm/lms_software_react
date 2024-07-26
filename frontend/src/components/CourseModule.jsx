@@ -15,6 +15,7 @@ import { FaBars, FaTimes } from "react-icons/fa";
 import { RiSlackLine } from "react-icons/ri";
 import CourseModuleContainer from "./CourseModuleContainer";
 import { CgMenuRight } from "react-icons/cg";
+import GoogleDrive from "../assets/googledrive.png";
 
 const CourseModule = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -23,6 +24,10 @@ const CourseModule = () => {
   const [isDetailsVisible, setIsDetailsVisible] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [activeSection, setActiveSection] = useState("courseModules");
+  const [pdfs, setPdfs] = useState([]);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredPdfs, setFilteredPdfs] = useState([]);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -101,6 +106,76 @@ const CourseModule = () => {
     return location.pathname === path
       ? "bg-white text-pc_orange border-l-4 border-pc_orange"
       : "text-pc_black";
+  };
+
+  useEffect(() => {
+    if (activeSection === "resources") {
+      const groupedStudyMaterials = JSON.parse(
+        localStorage.getItem("groupedStudyMaterials")
+      );
+
+      if (groupedStudyMaterials && groupedStudyMaterials.courseModules) {
+        // Extract PDFs from all modules and lectures
+        const pdfList = groupedStudyMaterials.courseModules.flatMap(
+          (module) =>
+            module.studyMaterials?.finalResult?.flatMap(
+              (lectureItem) =>
+                lectureItem.lecture?.attachments?.filter(
+                  (attachment) => attachment.kind === "pdf_embed"
+                ) || []
+            ) || []
+        );
+
+        // Prepare data for state with cleaned names
+        const pdfs = pdfList.map((pdf) => ({
+          name: cleanPdfName(pdf.name),
+          url: pdf.url,
+        }));
+
+        setPdfs(pdfs);
+        setFilteredPdfs(pdfs);
+        console.log("Extracted PDFs:", pdfs);
+      } else {
+        console.warn("No valid groupedStudyMaterials found.");
+        setPdfs([]);
+      }
+    }
+  }, [activeSection]);
+
+  useEffect(() => {
+    if (activeSection === "resources") {
+      const filtered = pdfs.filter((pdf) =>
+        pdf.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredPdfs(filtered);
+    }
+  }, [searchTerm, pdfs, activeSection]);
+
+  const clearSearch = () => {
+    setSearchTerm("");
+  };
+
+  // Function to clean PDF names
+  const cleanPdfName = (name) => {
+    // Remove the file extension
+    let cleanName = name.replace(".pdf", "");
+
+    // Remove the leading "W" followed by numbers and any subsequent underscores or hyphens
+    cleanName = cleanName.replace(/^W\d+[_-]*/, "");
+
+    // Replace remaining underscores with spaces
+    cleanName = cleanName.replace(/_/g, " ");
+
+    // Remove any leading numbers and underscores/hyphens
+    cleanName = cleanName.replace(/^\d+[_-]*/, "");
+
+    // Trim any leading or trailing whitespace
+    cleanName = cleanName.trim();
+
+    // Capitalize the first letter of each word
+    cleanName = cleanName.replace(/\b\w/g, (l) => l.toUpperCase());
+
+    return cleanName;
   };
 
   return (
@@ -311,8 +386,29 @@ const CourseModule = () => {
           </div>
 
           <div className="bg-pc_white_white mt-8 p-4 md:p-10 rounded-t-xl h-max md:min-h-screen w-full">
-            <div className="text-[28px] lg:text-[32px] leading-tight text-center lg:text-start font-gilroy_semibold text-pc_blue p-6 lg:p-0">
+            <div className="text-[28px] lg:text-[32px] leading-tight text-center lg:text-start font-gilroy_semibold text-pc_blue p-6 lg:p-0 flex flex-col lg:flex-row items-center justify-between gap-7 lg:gap-0">
               {selectedCourse ? <h1>{selectedCourse.course_name}</h1> : <p></p>}
+
+              {activeSection === "resources" && (
+                <div className="mb-4">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search PDFs..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="px-5 border rounded h-[50px] w-[350px] text-base placeholder:text-base placeholder:font-gilroy"
+                    />
+
+                    <button
+                      onClick={clearSearch}
+                      className="absolute right-5 top-1/2 transform -translate-y-1/2 text-base bg-pc_orange text-pc_white_white p-1 rounded-full w-[24px] h-[24px] flex items-center justify-center"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
             {/* Main Toggle Buttons */}
             <div className="mt-8 bg-pc_white_white lg:bg-pc_bg rounded-xl w-full overflow-x-auto md:overflow-x-hidden">
@@ -359,11 +455,33 @@ const CourseModule = () => {
               )}
               {activeSection === "resources" && (
                 <div>
-                  {/* Resources Content */}
-                  <h3>Resources</h3>
-                  {/* Your Resources Content Here */}
+                  {filteredPdfs.length > 0 ? (
+                    <ul className="space-y-2">
+                      {filteredPdfs.map((pdf, index) => (
+                        <li
+                          key={index}
+                          className="bg-white p-3 border-b border-slate-200 cursor-pointer h-[92px] flex items-center justify-start"
+                        >
+                          <a
+                            href={pdf.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:underline flex items-center justify-start gap-3"
+                          >
+                            <img src={GoogleDrive} alt="" />
+                            <div className="font-gilroy_semibold">
+                              {pdf.name}
+                            </div>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>No PDFs available.</p>
+                  )}
                 </div>
               )}
+
               {activeSection === "paymentStatus" && (
                 <div>
                   {/* Payment Status Content */}
