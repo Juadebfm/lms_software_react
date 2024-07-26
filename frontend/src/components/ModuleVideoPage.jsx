@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import ModuleImage from "../assets/moduleimage.png";
 import Pluralcode from "../assets/PluralCode.png";
@@ -8,7 +8,7 @@ import { TfiHelpAlt } from "react-icons/tfi";
 import { TbLogout } from "react-icons/tb";
 import { IoIosArrowRoundBack, IoMdSearch } from "react-icons/io";
 import Plc from "../assets/plc.png";
-import { FaBars, FaReadme, FaTimes } from "react-icons/fa";
+import { FaBars, FaCheckCircle, FaReadme, FaTimes } from "react-icons/fa";
 import { AuthContext } from "../context/AuthContext";
 import { DashboardDataContext } from "../context/DashboardDataContext";
 import {
@@ -32,10 +32,38 @@ const ModuleVideoPage = () => {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [currentVideoUrl, setCurrentVideoUrl] = useState(null);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const [currentItemStartTime, setCurrentItemStartTime] = useState(null);
+  const [currentPdfUrl, setCurrentPdfUrl] = useState(null);
+
   const { userData } = useContext(AuthContext);
   const { dashboardData } = useContext(DashboardDataContext);
 
   const { enrolledcourses, message, token, totalbalance, user } = userData;
+
+  const videoRef = useRef(null);
+
+  const {
+    academy_level,
+    age,
+    country,
+    year,
+    student_id_number,
+    state,
+    email,
+    phone_number,
+    date,
+  } = user;
+
+  const capitalizedEmail = email.charAt(0).toUpperCase() + email.slice(1);
+
+  const loadProgress = (moduleId) => {
+    const allProgress = JSON.parse(
+      localStorage.getItem("moduleProgress") || "{}"
+    );
+    return allProgress[moduleId] || {};
+  };
+
+  const [itemStatus, setItemStatus] = useState(() => loadProgress(moduleId));
 
   useEffect(() => {
     const fetchModuleData = () => {
@@ -49,13 +77,35 @@ const ModuleVideoPage = () => {
         setModuleData(module || null);
 
         if (module) {
-          // Find the first video URL
-          const firstVideo = module.studyMaterials?.finalResult
-            .flatMap((item) => item.lecture.attachments)
-            .find((attachment) => attachment.kind === "video");
+          const progress = loadProgress(moduleId);
+          setItemStatus(progress);
 
-          if (firstVideo) {
-            setCurrentVideoUrl(firstVideo.url);
+          // Find the first uncompleted video
+          const firstUncompletedIndex =
+            module.studyMaterials?.finalResult
+              .flatMap((item, lectureIndex) =>
+                item.lecture.attachments.map((attachment, attachmentIndex) => ({
+                  attachment,
+                  index:
+                    lectureIndex * item.lecture.attachments.length +
+                    attachmentIndex,
+                }))
+              )
+              .find(
+                ({ attachment, index }) =>
+                  attachment.kind === "video" && !progress[index]
+              )?.index || 0;
+
+          const firstUncompletedVideo = module.studyMaterials?.finalResult
+            .flatMap((item) => item.lecture.attachments)
+            .find(
+              (attachment, index) =>
+                attachment.kind === "video" && index === firstUncompletedIndex
+            );
+
+          if (firstUncompletedVideo) {
+            setCurrentVideoUrl(firstUncompletedVideo.url);
+            setCurrentVideoIndex(firstUncompletedIndex);
           }
         }
       }
@@ -72,6 +122,23 @@ const ModuleVideoPage = () => {
       }
     }
   }, [currentVideoUrl]);
+
+  useEffect(() => {
+    if (currentItemStartTime) {
+      const timer = setInterval(() => {
+        const elapsedTime = (Date.now() - currentItemStartTime) / 1000;
+        if (elapsedTime >= 180) {
+          // 3 minutes
+          setItemStatus((prev) => {
+            const newStatus = { ...prev, [currentVideoIndex]: "completed" };
+            saveProgress(moduleId, newStatus);
+            return newStatus;
+          });
+        }
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [currentItemStartTime, currentVideoIndex, moduleId]);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleMobileSidebar = () =>
@@ -135,44 +202,117 @@ const ModuleVideoPage = () => {
   const { studyMaterials } = moduleData;
   const { videos, pdfs, quizzes } = countStudyMaterials(studyMaterials);
 
-  const handleLectureClick = (attachment) => {
+  const handleLectureClick = (attachment, index) => {
+    if (!isItemClickable(index, attachment)) return;
+
     switch (attachment.kind) {
       case "video":
         setCurrentVideoUrl(attachment.url);
         setCurrentVideoIndex(index);
+        setCurrentPdfUrl(null); // Clear PDF URL when a video is clicked
+        if (!itemStatus[index]) {
+          setCurrentItemStartTime(Date.now());
+        }
+        if (videoRef.current) {
+          videoRef.current.play();
+        }
         break;
+
       case "pdf_embed":
-        console.log("Display PDF:", attachment.url);
+        setCurrentPdfUrl(attachment.url);
+        setCurrentVideoUrl(null); // Clear video URL when a PDF is clicked
+        setItemStatus((prev) => {
+          const newStatus = { ...prev, [index]: "completed" };
+          saveProgress(moduleId, newStatus);
+          return newStatus;
+        });
         break;
+
       case "quiz":
+        // Store quiz data in local storage
+        localStorage.setItem("currentQuizData", JSON.stringify(attachment));
+
+        // Navigate to quiz page
         navigate(`/quiz/${attachment.id}`);
         break;
+
       default:
         console.log("Unknown attachment type");
     }
   };
 
-  const getAllVideos = () => {
+  const renderIcon = (attachment, index) => {
+    if (itemStatus[index] === "completed") {
+      return <FaCheckCircle className="text-[25px] text-green-500" />;
+    }
+    if (attachment.kind === "video") {
+      return <FaRegCirclePlay className="text-[25px]" />;
+    } else if (attachment.kind === "pdf_embed") {
+      return <img src={Reading} className="w-[32px] h-[32px]" />;
+    } else if (attachment.kind === "quiz") {
+      return <MdOutlineQuiz className="text-[25px]" />;
+    }
+  };
+
+  const isItemClickable = (index, attachment) => {
+    if (itemStatus[index] === "completed") return true;
+    if (index === 0) return true;
+    if (index > 0 && itemStatus[index - 1] === "completed") return true;
+    if (attachment.kind === "quiz") {
+      return (
+        Object.keys(itemStatus).filter((key) => itemStatus[key] === "completed")
+          .length === index
+      );
+    }
+    return false;
+  };
+
+  const getAllAttachments = () => {
     return studyMaterials.finalResult.flatMap((item) =>
       item.lecture.attachments.filter(
-        (attachment) => attachment.kind === "video"
+        (attachment) =>
+          attachment.kind === "video" || attachment.kind === "pdf_embed"
       )
     );
   };
 
-  const allVideos = getAllVideos();
+  const allAttachments = getAllAttachments();
 
-  const goToPreviousVideo = () => {
+  const goToPreviousAttachment = () => {
     if (currentVideoIndex > 0) {
-      setCurrentVideoIndex((prevIndex) => prevIndex - 1);
-      setCurrentVideoUrl(allVideos[currentVideoIndex - 1].url);
+      const previousIndex = currentVideoIndex - 1;
+      setCurrentVideoIndex(previousIndex);
+      const previousAttachment = allAttachments[previousIndex];
+      setCurrentVideoUrl(
+        previousAttachment.kind === "video" ? previousAttachment.url : null
+      );
+      setCurrentPdfUrl(
+        previousAttachment.kind === "pdf_embed" ? previousAttachment.url : null
+      );
     }
   };
 
-  const goToNextVideo = () => {
-    if (currentVideoIndex < allVideos.length - 1) {
-      setCurrentVideoIndex((prevIndex) => prevIndex + 1);
-      setCurrentVideoUrl(allVideos[currentVideoIndex + 1].url);
+  const goToNextAttachment = () => {
+    if (currentVideoIndex < allAttachments.length - 1) {
+      const nextIndex = currentVideoIndex + 1;
+      const nextAttachment = allAttachments[nextIndex];
+
+      // Mark the current item as completed
+      if (!itemStatus[currentVideoIndex]) {
+        setItemStatus((prev) => {
+          const newStatus = { ...prev, [currentVideoIndex]: "completed" };
+          saveProgress(moduleId, newStatus);
+          return newStatus;
+        });
+      }
+
+      setCurrentVideoIndex(nextIndex);
+      setCurrentVideoUrl(
+        nextAttachment.kind === "video" ? nextAttachment.url : null
+      );
+      setCurrentPdfUrl(
+        nextAttachment.kind === "pdf_embed" ? nextAttachment.url : null
+      );
     }
   };
 
@@ -199,6 +339,28 @@ const ModuleVideoPage = () => {
       return "Practice Quiz: Test What You Have Just Learned";
     }
     return attachment.name || "Untitled";
+  };
+
+  const saveProgress = (moduleId, progress) => {
+    const allProgress = JSON.parse(
+      localStorage.getItem("moduleProgress") || "{}"
+    );
+    allProgress[moduleId] = progress;
+    localStorage.setItem("moduleProgress", JSON.stringify(allProgress));
+  };
+
+  const markQuizCompleted = (quizIndex) => {
+    setItemStatus((prev) => {
+      const newStatus = { ...prev, [quizIndex]: "completed" };
+      saveProgress(moduleId, newStatus);
+      return newStatus;
+    });
+  };
+
+  const handleVideoPlay = () => {
+    if (!itemStatus[currentVideoIndex]) {
+      setCurrentItemStartTime(Date.now());
+    }
   };
 
   return (
@@ -380,7 +542,7 @@ const ModuleVideoPage = () => {
         </div>
 
         <div
-          className="flex-1 p-8 bg-pc_bg font-gilroy overflow-y-auto"
+          className="flex-1 p-0 bg-pc_bg font-gilroy overflow-y-auto"
           id="main-content"
         >
           <div className="flex items-center justify-between">
@@ -417,7 +579,7 @@ const ModuleVideoPage = () => {
 
                 <div className="flex justify-between mt-4">
                   <button
-                    onClick={goToPreviousVideo}
+                    onClick={goToPreviousAttachment}
                     disabled={currentVideoIndex === 0}
                     className={`px-4 py-2 bg-transparent text-pc_blue font-gilroy_semibold flex items-center justify-center gap-1 ${
                       currentVideoIndex === 0
@@ -429,10 +591,10 @@ const ModuleVideoPage = () => {
                     Previous
                   </button>
                   <button
-                    onClick={goToNextVideo}
-                    disabled={currentVideoIndex === allVideos.length - 1}
+                    onClick={goToNextAttachment}
+                    disabled={currentVideoIndex === allAttachments.length - 1}
                     className={`px-4 py-2 bg-transparent text-pc_blue font-gilroy_semibold flex items-center justify-center gap-1 ${
-                      currentVideoIndex === allVideos.length - 1
+                      currentVideoIndex === allAttachments.length - 1
                         ? "opacity-50 cursor-not-allowed"
                         : ""
                     }`}
@@ -443,80 +605,97 @@ const ModuleVideoPage = () => {
                 </div>
               </div>
 
-              <div className="">
+              <div className="w-full">
                 {currentVideoUrl && (
-                  <div className="w-full">
-                    <video
-                      src={currentVideoUrl}
-                      controls
-                      className="max-w-full mx-auto h-[543px]"
-                    >
-                      Your browser does not support the video tag.
-                    </video>
-                  </div>
+                  <video
+                    ref={videoRef}
+                    src={currentVideoUrl}
+                    controls
+                    className="max-w-full mx-auto h-[543px]"
+                    onPlay={handleVideoPlay}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                )}
+                {currentPdfUrl && (
+                  <iframe
+                    src={currentPdfUrl}
+                    style={{ width: "100%", height: "543px" }}
+                    frameBorder="0"
+                  >
+                    This browser does not support PDFs. Please download the PDF
+                    to view it: <a href={currentPdfUrl}>Download PDF</a>.
+                  </iframe>
                 )}
               </div>
             </div>
 
-            <div className="flex flex-col gap-4 w-full lg:max-w-[30%] scrollbar scrollbar-thumb-pc_blue scrollbar-track-pc_blue/40 h-screen overflow-y-scroll">
+            <div className="flex flex-col gap-4 w-full lg:max-w-[30%] scrollbar scrollbar-thumb-pc_blue scrollbar-track-pc_blue/40 h-screen overflow-y-scroll py-8">
               <div className="px-4">
                 <div className="text-xl font-gilroy_semibold capitalize">
                   {moduleData.moduleName}
                 </div>
                 {studyMaterials && studyMaterials.finalResult.length > 0 ? (
-                  studyMaterials.finalResult.map((item, index) => (
-                    <div
-                      key={index}
-                      className="shadow-md shadow-pc_light_gray p-4 mt-5"
-                    >
-                      <h2 className="text-2xl font-semibold mb-4 capitalize">
-                        {item.lecture.lectureName}
-                      </h2>
-                      <ul className="">
-                        {item.lecture.attachments.map((attachment, index) => (
-                          <li
-                            key={index}
-                            className="cursor-pointer"
-                            onClick={() => handleLectureClick(attachment)}
+                  studyMaterials.finalResult.flatMap((item, lectureIndex) =>
+                    item.lecture.attachments.map(
+                      (attachment, attachmentIndex) => {
+                        const index =
+                          lectureIndex * item.lecture.attachments.length +
+                          attachmentIndex;
+                        const clickable = isItemClickable(index, attachment);
+
+                        if (!item.lecture.attachments.length) {
+                          return null; // Skip if no attachments
+                        }
+
+                        return (
+                          <div
+                            key={lectureIndex}
+                            className="shadow-md shadow-pc_light_gray p-4 mt-5 "
                           >
-                            {attachment.kind === "video" && (
-                              <span className="flex items-start justify-start gap-2">
-                                <div className="w-[15%] flex items-center justify-center">
-                                  <FaRegCirclePlay className="text-[25px] " />
-                                </div>
-                                <div className="w-[85%]">
-                                  {formatAttachmentName(attachment)}
-                                </div>
-                              </span>
-                            )}
-                            {attachment.kind === "pdf_embed" && (
-                              <span className="flex items-start gap-2 justify-start">
-                                <div className="w-[15%] flex items-center justify-center">
-                                  <img
-                                    src={Reading}
-                                    className="w-[32px] h-[32px]"
-                                  />
-                                </div>
-                                <div className="w-[85%]">
-                                  {formatAttachmentName(attachment)}
-                                </div>
-                              </span>
-                            )}
-                            {attachment.kind === "quiz" && (
-                              <span className="flex items-start justify-start gap-2">
-                                <div className="w-[15%] flex items-center justify-center">
-                                  <MdOutlineQuiz className="text-[25px] " />
-                                </div>
-                                <div className="w-[85%]">
-                                  {formatAttachmentName(attachment)}
-                                </div>
-                              </span>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))
+                            <h2 className="text-2xl font-semibold mb-4 capitalize">
+                              {item.lecture.lectureName}
+                            </h2>
+                            <ul className="">
+                              {item.lecture.attachments.map(
+                                (attachment, attachmentIndex) => {
+                                  const index =
+                                    lectureIndex *
+                                      item.lecture.attachments.length +
+                                    attachmentIndex;
+                                  const clickable = isItemClickable(
+                                    index,
+                                    attachment
+                                  );
+                                  return (
+                                    <li
+                                      key={attachmentIndex}
+                                      className={`cursor-pointer ${
+                                        clickable ? "" : "opacity-50"
+                                      }`}
+                                      onClick={() =>
+                                        clickable &&
+                                        handleLectureClick(attachment, index)
+                                      }
+                                    >
+                                      <span className="flex items-start justify-start gap-2">
+                                        <div className="w-[15%] flex items-center justify-center">
+                                          {renderIcon(attachment, index)}
+                                        </div>
+                                        <div className="w-[85%]">
+                                          {formatAttachmentName(attachment)}
+                                        </div>
+                                      </span>
+                                    </li>
+                                  );
+                                }
+                              )}
+                            </ul>
+                          </div>
+                        );
+                      }
+                    )
+                  )
                 ) : (
                   <p>No study materials available.</p>
                 )}

@@ -30,6 +30,22 @@ const CourseModule = () => {
   const { userData } = useContext(AuthContext);
   const { dashboardData } = useContext(DashboardDataContext);
 
+  const { enrolledcourses, message, token, totalbalance, user } = userData;
+
+  const {
+    academy_level,
+    age,
+    country,
+    year,
+    student_id_number,
+    state,
+    email,
+    phone_number,
+    date,
+  } = user;
+
+  const capitalizedEmail = email.charAt(0).toUpperCase() + email.slice(1);
+
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleMobileSidebar = () =>
     setIsMobileSidebarOpen(!isMobileSidebarOpen);
@@ -86,8 +102,6 @@ const CourseModule = () => {
       ? "bg-white text-pc_orange border-l-4 border-pc_orange"
       : "text-pc_black";
   };
-
-  const { enrolledcourses, message, token, totalbalance, user } = userData;
 
   return (
     <div className="flex h-screen">

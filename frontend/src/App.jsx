@@ -8,6 +8,7 @@ import Profile from "./components/Profile";
 import CourseModulesPage from "./components/CourseModule";
 import HelpCenter from "./components/HelpCenter";
 import ModuleVideoPage from "./components/ModuleVideoPage";
+import QuizComponent from "./components/QuizComponent";
 
 const App = () => {
   return (
@@ -35,6 +36,11 @@ const App = () => {
         <Route
           path="/module/:moduleId"
           element={<ProtectedRoutes element={<ModuleVideoPage />} />}
+        />
+
+        <Route
+          path="/quiz/:quizId"
+          element={<ProtectedRoutes element={<QuizComponent />} />}
         />
 
         <Route path="/" element={<Login />} />
