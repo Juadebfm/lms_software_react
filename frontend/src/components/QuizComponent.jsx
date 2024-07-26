@@ -402,13 +402,7 @@ const QuizComponent = () => {
                         />
                         <label
                           htmlFor={`q${index}a${answerIndex}`}
-                          className={`cursor-pointer ${
-                            isRetry && userSelections[index] === answer
-                              ? answer === question.correct_answers[0]
-                                ? "text-green-500"
-                                : "text-red-500"
-                              : ""
-                          }`}
+                          className="cursor-pointer"
                         >
                           {answer}
                         </label>
